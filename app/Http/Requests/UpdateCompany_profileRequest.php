@@ -22,10 +22,10 @@ class UpdateCompany_profileRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'company_name' => 'required|string|max:255',
-      'industry' => 'required|string|max:255',
-      'company_size' => 'required|integer|min:1',
-      'founded_year' => 'required|integer|digits:4|min:1800|max:' . date('Y'),
+      'company_name' => 'nullable|string|max:255',
+      'industry' => 'nullable|string|max:255',
+      'company_size' => 'nullable|integer|min:1',
+      'founded_year' => 'nullable|integer|digits:4|min:1800|max:' . date('Y'),
     ];
   }
 }

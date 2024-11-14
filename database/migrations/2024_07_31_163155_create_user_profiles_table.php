@@ -19,7 +19,7 @@ return new class extends Migration
       $table->string('profile_picture')->nullable();
       $table->text('bio')->nullable();
       $table->string('location')->nullable();
-      $table->unsignedInteger('phone_number')->nullable();
+      $table->string('phone_number', 20)->nullable();  // 20 characters to accommodate country codes and separators
       $table->string('website')->nullable();
       $table->timestamps();
     });

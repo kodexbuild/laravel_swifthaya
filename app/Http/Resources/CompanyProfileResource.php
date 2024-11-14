@@ -22,6 +22,9 @@ class CompanyProfileResource extends JsonResource
       'company_size' => $this->company_size,
       'founded_year' =>  $this->founded_year,
       'status' => $this->status,
+      'user' => new UserResource($this->userprofile->user),  // Including user 
+      // 'user_details' => new UserResource($this->whenLoaded('user')), 
+
     ];
   }
 }

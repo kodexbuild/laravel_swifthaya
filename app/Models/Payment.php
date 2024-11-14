@@ -15,6 +15,8 @@ class Payment extends Model
     "payer_type",
     "net_amount",
     "amount",
+    "refunded_amount",
+    "balance",
     "platform_fee",
     "currency",
     "payment_status",
@@ -24,5 +26,9 @@ class Payment extends Model
   public function user()
   {
     return $this->belongsTo(User::class, 'user_id');
+  }
+  public function refund()
+  {
+    $this->hasMany(Refund::class, "payment_id");
   }
 }

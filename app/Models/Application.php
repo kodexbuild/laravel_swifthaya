@@ -13,8 +13,6 @@ class Application extends Model
     'applicant_id',
     'swifthayajob_id',
     'project_id',
-    'cover_letter',
-    'attachments',
     'applied_at',
     'status',
   ];

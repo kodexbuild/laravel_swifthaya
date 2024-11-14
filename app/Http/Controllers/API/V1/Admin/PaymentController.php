@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\V1\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
 use App\Models\Payment;
+use App\Models\Refund;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,46 @@ class PaymentController extends Controller
       // Handle failure
       return response()->json([
         'message' => 'Failed to retrieve payments',
+        'error' => $e->getMessage()
+      ], 500);
+    }
+  }
+
+  // Get the total no of payments 
+  public function paymentCount()
+  {
+    try {
+      $payment_count = Payment::count();
+      return response()->json([
+        "message" => "Payment count retrieved successfully.",
+        "data" => [
+          "count" => $payment_count
+        ]
+      ]);
+    } catch (Exception $e) {
+      // Handle failure
+      return response()->json([
+        'message' => 'Failed to retrieve payment count',
+        'error' => $e->getMessage()
+      ], 500);
+    }
+  }
+
+  // Get the total no of refunds 
+  public function refundCount()
+  {
+    try {
+      $refund_count = Refund::count();
+      return response()->json([
+        "message" => "Refund count retrieved successfully.",
+        "data" => [
+          "count" => $refund_count
+        ]
+      ]);
+    } catch (Exception $e) {
+      // Handle failure
+      return response()->json([
+        'message' => 'Failed to retrieve refund count',
         'error' => $e->getMessage()
       ], 500);
     }

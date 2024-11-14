@@ -3,7 +3,7 @@
 use App\Http\Controllers\API\V1\MessageController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:sanctum', "can:company"])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
   // Get all conversations for the authenticated user
   Route::get("/conversations", [MessageController::class, "conversations"]);
 
@@ -13,5 +13,7 @@ Route::middleware(['auth:sanctum', "can:company"])->group(function () {
 
   // Send a message to a recipient
   Route::post("/messages/{recipient}", [MessageController::class, "store_conversation_and_message"]);
+  Route::delete("/messages/{message}", [MessageController::class, "destroyMessage"]);
+  Route::delete("/messages/{conversation}", [MessageController::class, "destroyConversation"]);
 });
 

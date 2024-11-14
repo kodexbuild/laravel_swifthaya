@@ -19,10 +19,25 @@ class TalentProfileController extends Controller
   public function index()
   {
     try {
-      $talent_profiles = Talent_profile::paginate(10); // Use pagination to limit results
+      $talent_profiles = Talent_profile::with("userprofile")->paginate(10); // Use pagination to limit results
       return TalentProfileResource::collection($talent_profiles); // Return paginated results as resource
     } catch (Exception $e) {
       return response()->json(['message' => 'Failed to retrieve Talent Profiles', 'error' => $e->getMessage()], 500); // Handle failure case
+    }
+  }
+
+  public function count()
+  {
+    try {
+      $talent_profiles_count = Talent_profile::count();
+      return response()->json([
+        "message" => "Talent profile count retrieved successfully.",
+        "data" => [
+          "count" => $talent_profiles_count
+        ]
+      ]);
+    } catch (Exception $e) {
+      return response()->json(['message' => 'Failed to retrieve talent profile count', 'error' => $e->getMessage()], 500); // Handle failure case
     }
   }
 
@@ -115,26 +130,26 @@ class TalentProfileController extends Controller
     }
   }
 
-  // Delete a Talent Profile
-  public function destroy(Talent_profile $talent_profile)
-  {
-    Gate::authorize("delete", $talent_profile); // Check if the user is authorized to delete the profile
+  // // Delete a Talent Profile
+  // public function destroy(Talent_profile $talent_profile)
+  // {
+  //   Gate::authorize("delete", $talent_profile); // Check if the user is authorized to delete the profile
 
-    DB::beginTransaction(); // Begin DB transaction
+  //   DB::beginTransaction(); // Begin DB transaction
 
-    try {
-      $talent_profile->delete(); // Delete the talent profile
-      $talent_profile->userprofile->user->delete(); // Also delete the associated user (risky, double-check this logic!)
-      DB::commit(); // Commit transaction after successful deletion
+  //   try {
+  //     $talent_profile->delete(); // Delete the talent profile
+  //     $talent_profile->userprofile->user->delete(); // Also delete the associated user (risky, double-check this logic!)
+  //     DB::commit(); // Commit transaction after successful deletion
 
-      return response()->json([
-        "message"  => "Talent Profile deleted successfully"
-      ]);
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback in case of failure
-      return response()->json(['message' => 'Failed to delete Talent Profile', 'error' => $e->getMessage()], 500);
-    }
-  }
+  //     return response()->json([
+  //       "message"  => "Talent Profile deleted successfully"
+  //     ]);
+  //   } catch (Exception $e) {
+  //     DB::rollBack(); // Rollback in case of failure
+  //     return response()->json(['message' => 'Failed to delete Talent Profile', 'error' => $e->getMessage()], 500);
+  //   }
+  // }
 
   // Approve a Talent Profile
   public function approve(Talent_profile $talent_profile)
@@ -145,8 +160,8 @@ class TalentProfileController extends Controller
       $talent_profile->status = 'approved'; // Set status to 'approved'
       $talent_profile->save(); // Save the changes
       DB::commit(); // Commit transaction after successful approval
-
-      return response()->json(['message' => 'Talent profile approved successfully.'], 200);
+      $talent_profile->refresh();
+      return response()->json(['message' => 'Talent profile approved successfully.', "data" => new TalentProfileResource($talent_profile)], 200);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback in case of failure
       return response()->json(['message' => 'Failed to approve talent profile', 'error' => $e->getMessage()], 500);
@@ -163,7 +178,8 @@ class TalentProfileController extends Controller
       $talent_profile->save(); // Save the changes
       DB::commit(); // Commit transaction after successful rejection
 
-      return response()->json(['message' => 'Talent profile rejected successfully.'], 200);
+      $talent_profile->refresh();
+      return response()->json(['message' => 'Talent profile rejected successfully.', "data" => new TalentProfileResource($talent_profile)], 200);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback in case of failure
       return response()->json(['message' => 'Failed to reject talent profile', 'error' => $e->getMessage()], 500);

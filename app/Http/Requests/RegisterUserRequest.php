@@ -26,8 +26,16 @@ class RegisterUserRequest extends FormRequest
       'first_name' => ['required', 'string', 'max:255'],
       'last_name' => ['required', 'string', 'max:255'],
       'email' => ['required', 'email', 'unique:users'],
-      'password' => ['required', 'confirmed', Rules\Password::defaults()],
+      'password' => [
+        'required',
+        'confirmed',
+        Rules\Password::defaults()
+      ],
       'user_type' => ['required', 'in:company,individual,talent,admin'],
+      'location' => 'required|string|max:255',
+      'phone_number' => ['nullable', 'regex:/^\+?[0-9\s\-\(\)]+$/'],  // Allows numbers, spaces, dashes, parentheses, and an optional leading '+'
+      'bio' => 'nullable|string',
+      'website' => 'nullable|url|max:255',
     ];
   }
 }

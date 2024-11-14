@@ -18,20 +18,13 @@ class UserResource extends JsonResource
       'id' => $this->id,
       'email' => $this->email,
       'user_type' => $this->user_type,
+      'user_status' => $this->user_status,
       'status' => $this->status,
       // 'last_login_at' => $this->last_login_at,
       'created_at' => $this->created_at->toDateTimeString(),
-      "userprofile" => [
-        'id' => $this->userprofile->id,
-        'user_id' => $this->userprofile->user_id,
-        'first_name' => ucfirst($this->userprofile->first_name),
-        'last_name' => ucfirst($this->userprofile->last_name),
-        'profile_picture' => $this->userprofile->profile_picture,
-        'bio' => $this->userprofile->bio,
-        'location' => $this->userprofile->location,
-        'phone_number' => $this->userprofile->phone_number,
-        'website' => $this->userprofile->website
-      ]
+      
+      'user_profile' => new UserProfileResource($this->userprofile),  // Including user 
+
     ];
   }
 }

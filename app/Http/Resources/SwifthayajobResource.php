@@ -21,9 +21,10 @@ class SwifthayajobResource extends JsonResource
       'description' => $this->description,
       'required_skills' => $this->required_skills,
       'location' => $this->location,
-      'salary_range' => $this->salary_range,
+      'salary_min' => $this->salary_min,
+      'salary_max' => $this->salary_max,
       'job_type' => $this->job_type,
-      'posted_at' => $this->posted_at->toDateTimeString(),
+      'posted_at' => $this->posted_at,
       'deadline_date' => (is_null($this->deadline_date)) ? $this->deadline_date : $this->deadline_date->toDateTimeString(),
       'status' => $this->status,
     ];

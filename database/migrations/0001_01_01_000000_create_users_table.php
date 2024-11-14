@@ -18,10 +18,10 @@ return new class extends Migration
       $table->enum('user_type', ['talent', 'company', 'individual', 'admin']);
       // $table->rememberToken();
       // $table->timestamp('email_verified_at')->nullable();
+      $table->enum('user_status', ['active', 'banned'])->default('active'); // Track active and banned users 
       $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
       $table->timestamp('last_login_at')->nullable();
       $table->timestamps();
-      
     });
 
     Schema::create('password_reset_tokens', function (Blueprint $table) {

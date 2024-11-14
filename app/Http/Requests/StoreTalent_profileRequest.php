@@ -22,10 +22,10 @@ class StoreTalent_profileRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'skills' => 'required|string',
+      'skills' => 'required|array',
       'experience' => 'required|array',
       'education' => 'required|array',
-      'portfolio' => 'nullable|array',
+      'portfolio' => 'required|array',
     ];
   }
 }

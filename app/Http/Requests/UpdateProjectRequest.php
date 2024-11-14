@@ -24,8 +24,8 @@ class UpdateProjectRequest extends FormRequest
     return [
       'title' => 'required|string|max:255',
       'description' => 'required|string',
-      'required_skills' => 'nullable|string',
-      'budget' => 'nullable|numeric|min:0',
+      'required_skills' => 'nullable|array',
+      'budget' => 'nullable|integer|min:0',
       'duration' => 'nullable|integer|min:1',
       'deadline_date' => 'nullable|date|after_or_equal:posted_at',
     ];

@@ -67,7 +67,7 @@ Route::prefix('admin')->middleware("auth", "can:admin", "verified")->group(funct
   // Company Management
   Route::get('/companies', [ProfilesController::class, 'listCompanies'])->name('admin.companies');
   Route::get('/companies/{user_profile}/create', [ProfilesController::class, 'createCompany'])->name('admin.companies.create');
-  Route::post('/companies/{user_profile}create', [ProfilesController::class, 'storeCompany'])->name('admin.companies.store');
+  Route::post('/companies/create', [ProfilesController::class, 'storeCompany'])->name('admin.companies.store');
   Route::get('/companies/{company}', [ProfilesController::class, 'viewCompany'])->name('admin.companies.view');
   Route::get('/companies/{company}/edit', [ProfilesController::class, 'editCompany'])->name('admin.companies.edit');
   Route::post('/companies/{company}/edit', [ProfilesController::class, 'updateCompany'])->name('admin.companies.update');

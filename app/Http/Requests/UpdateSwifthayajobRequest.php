@@ -24,7 +24,7 @@ class UpdateSwifthayajobRequest extends FormRequest
         return [
           'title' => 'required|string|max:255',
           'description' => 'required|string',
-          'required_skills' => 'nullable|string',
+          'required_skills' => 'nullable|array',
           'location' => 'nullable|string|max:255',
           'salary_range' => 'nullable|string|max:255',
           'job_type' => 'required|in:full-time,part-time,contract',

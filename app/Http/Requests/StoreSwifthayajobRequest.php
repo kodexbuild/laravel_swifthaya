@@ -25,10 +25,19 @@ class StoreSwifthayajobRequest extends FormRequest
       'title' => 'required|string|max:255',
       'description' => 'required|string',
       'job_type' => 'required|in:full-time,part-time,contract',
-      'required_skills' => 'nullable|string',
-      'location' => 'nullable|string|max:255',
-      'salary_range' => 'nullable|string|max:255',
+      'required_skills' => 'required|array',
+      'location' => 'required|string|max:255',
+      'salary_min' => ['required','numeric','min:1'],  // Ensure min salary is a positive number
+      'salary_max' => ['required', 'numeric', 'min:1', 'gte:salary_min'],  // Max salary must be greater than or equal to min salary
       'deadline_date' => 'nullable|date|after_or_equal:posted_at',
+    ];
+
+  }
+  public function messages()
+  {
+    return [
+      "salary_min.min" => "The minimum salary must be at least ₦1",
+      "salary_max.min" => "The maximum salary must be at least ₦1"
     ];
   }
 }

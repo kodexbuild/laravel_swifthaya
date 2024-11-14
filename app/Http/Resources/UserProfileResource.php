@@ -17,8 +17,8 @@ class UserProfileResource extends JsonResource
     return [
       'id' => $this->id,
       'user_id' => $this->user_id,
-      'first_name' => ucfirst($this->first_name),
-      'last_name' => ucfirst($this->last_name),
+      'first_name' => $this->first_name,
+      'last_name' => $this->last_name,
       'profile_picture' => $this->profile_picture,
       'bio' => $this->bio,
       'location' => $this->location,

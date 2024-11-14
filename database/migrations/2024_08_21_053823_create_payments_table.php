@@ -19,12 +19,14 @@ return new class extends Migration
       $table->enum('payer_type', ['talent', 'individual', 'company', 'admin']);
       $table->foreignId('swifthayajob_id')->nullable()->constrained('swifthayajobs')->cascadeOnDelete();
       $table->foreignId('project_id')->nullable()->constrained('projects')->cascadeOnDelete();
-      $table->enum('payment_status', ['pending', 'completed', 'failed']);
       $table->decimal('amount', 15, 2);
       $table->decimal('platform_fee', 15, 2);
-      $table->decimal('net_amount', 15, 2);
+      $table->decimal('net_amount', 15, 2);//amount transferrable to the talent
+      $table->decimal('refunded_amount', 15, 2)->default(0);  // Total refunded so far
+      $table->decimal('balance', 15, 2);  // Amount left after refunds
       $table->string('currency')->default('NGN');
       $table->string('payment_method')->default('Paystack');
+      $table->enum('payment_status', ['pending', 'completed', 'failed']);
       $table->timestamp('payment_date')->useCurrent();
       $table->timestamps();
     });

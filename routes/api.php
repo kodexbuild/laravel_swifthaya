@@ -4,7 +4,6 @@ use App\Http\Controllers\API\V1\Admin\SwifthayajobController;
 use App\Http\Controllers\API\V1\Admin\TalentProfileController;
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\MessageController;
-use App\Http\Controllers\API\V1\PaymentController;
 use App\Http\Controllers\API\V1\ReviewController;
 use App\Http\Controllers\API\V1\UserController;
 use App\Models\User;
@@ -21,18 +20,23 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('/logout', [AuthController::class, "logout"]);
 
   // User and Userprofile
-  Route::get('/profile', [UserController::class, "show"]);
-  Route::post('/profile_image', [UserController::class, "profile_img"]);
-  Route::delete('/profile/delete', [UserController::class, "destroy"]);
+  Route::get('user', [UserController::class, "show"]);
+  // update
+  Route::patch('user', [UserController::class, "update"]);
 
+  // update / change password
+  Route::put('user/password', [UserController::class, "updatePassword"]);
 
-  // payments
-  Route::get('/initialize-payment', [PaymentController::class, 'init'])->name('payment.init');
+  // update / change profile pic
+  Route::post('user/profile_picture', [UserController::class, "profile_img"]);
 
-  Route::post('/payment/refund', [PaymentController::class, 'refundPayment']);
+  // create or update account details
+  Route::post('user/account', [UserController::class, "saveAccountDetails"]);
+  // delete
+  Route::delete('user', [UserController::class, "destroy"]);
 });
 
-Route::post('/payment/webhook', [PaymentController::class, 'handleWebhook']);
+
 
 
 // talents
@@ -50,5 +54,7 @@ require base_path('routes/API/application.php');
 // message
 require base_path('routes/API/message.php');
 
+// payment
+require base_path('routes/API/payment.php');
 // admin
 require base_path('routes/API/admin.php');

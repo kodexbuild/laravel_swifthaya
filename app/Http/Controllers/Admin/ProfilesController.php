@@ -11,7 +11,7 @@ use App\Models\Talent_profile;
 use App\Models\User_profile;
 use Illuminate\Http\Request;
 
-class ProfilesController extends Controller
+class aProfilesController extends Controller
 {
   /* talent */
   // List all Talent Profiles

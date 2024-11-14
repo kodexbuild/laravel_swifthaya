@@ -18,7 +18,26 @@ class User_profile extends Model
     'location',
     'phone_number',
     'website',
-];
+  ];
+  // mutators
+  public function setFirstNameAttribute($value)
+  {
+    $this->attributes['first_name'] = strtolower($value);
+  }
+
+  public function setLastNameAttribute($value)
+  {
+    $this->attributes['last_name'] = strtolower($value);
+  }
+  public function setLocationAttribute($value)
+  {
+    $this->attributes['location'] = strtolower($value);
+  }
+  public function setWebsiteAttribute($value)
+  {
+    $this->attributes['website'] = strtolower($value);
+  }
+  // relations
   public function user()
   {
     return $this->belongsTo(User::class);
@@ -39,12 +58,12 @@ class User_profile extends Model
   {
     return $this->hasMany(Application::class);
   }
- 
+
   public function getImgUrl()
   {
     if ($this->profile_picture) {
       return url('storage/' . $this->profile_picture);
     }
-    return ;
+    return;
   }
 }

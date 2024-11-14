@@ -19,7 +19,7 @@ class ProjectResource extends JsonResource
       'poster_id' => $this->poster_id,
       'title' => $this->title,
       'description' => $this->description,
-      'required_skills' => $this->required_skills,
+      'required_skills' => json_decode($this->required_skills),
       'budget' => $this->budget,
       'duration' => $this->duration,
       'posted_at' => $this->posted_at->toDateTimeString(),

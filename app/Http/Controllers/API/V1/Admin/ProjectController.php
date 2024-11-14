@@ -26,6 +26,23 @@ class ProjectController extends Controller
       return response()->json(['message' => 'Failed to retrieve Projects', 'error' => $e->getMessage()], 500);
     }
   }
+  // Get the total no of projects
+  public function count()
+  {
+    try {
+      $project_count = Project::count();
+
+      return response()->json([
+        "message" => "Project count retrieved successfully.",
+        "data" => [
+          "count" => $project_count
+        ]
+      ]);
+    } catch (Exception $e) {
+      DB::rollBack(); // Rollback in case of failure
+      return response()->json(['message' => 'Failed to retrieve Project count', 'error' => $e->getMessage()], 500);
+    }
+  }
 
   public function show(Project $project)
   {
@@ -66,9 +83,7 @@ class ProjectController extends Controller
     DB::beginTransaction(); // Begin DB transaction
 
     try {
-      $skillsArray = explode(',', request()->required_skills);
       $validated = $request->validated();
-      $skillsArray = explode(',', $validated["skills"]);
       $project->update($validated);
 
       DB::commit(); // Commit transaction
@@ -93,8 +108,9 @@ class ProjectController extends Controller
     // Set the project status to 'approved'
     $project->status = 'approved';
     $project->save();
+    $project->refresh();
 
-    return response()->json(["message" => "Project has been approved successfully"]);
+    return response()->json(["message" => "Project has been approved successfully", "data" => new ProjectResource($project)]);
   }
 
   // Reject project
@@ -103,7 +119,8 @@ class ProjectController extends Controller
     // Set the project status to 'rejected'
     $project->status = 'rejected';
     $project->save();
+    $project->refresh();
 
-    return response()->json(["message" => "Project has been rejected successfully"]);
+    return response()->json(["message" => "Project has been rejected successfully", "data" => new ProjectResource($project)]);
   }
 }

@@ -17,6 +17,28 @@ class Company_profile extends Model
     'founded_year',
   ];
 
+
+  // public function setCompanyNameAttribute($value)
+  // {
+  //   // Convert to cents (assuming $value is in dollars)
+  //   $this->attributes['company_name'] = strtolower($value);
+  // }
+
+  public function setIndustryAttribute($value)
+  {
+    $this->attributes['industry'] = ucwords(strtolower($value));
+  }
+  public function setCompanySizeAttribute($value)
+  {
+    $this->attributes['company_size'] = intval($value);
+  }
+  public function setFoundedYearAttribute($value)
+  {
+    $this->attributes['founded_year'] = intval($value);
+  }
+
+
+  // relations
   public function userprofile()
   {
     return $this->belongsTo(User_profile::class, 'user_profile_id', 'id');

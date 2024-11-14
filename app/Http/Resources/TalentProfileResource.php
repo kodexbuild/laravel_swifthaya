@@ -22,6 +22,7 @@ class TalentProfileResource extends JsonResource
       'education' => json_decode($this->education),
       'portfolio' => json_decode($this->portfolio),
       'status' => $this->status,
+      'user' => new UserResource($this->userprofile->user),  // Including user 
     ];
   }
 }

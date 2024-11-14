@@ -18,7 +18,8 @@ return new class extends Migration
       $table->text('description');
       $table->string('required_skills')->nullable();
       $table->string('location')->nullable();
-      $table->string('salary_range')->nullable();
+      $table->integer('salary_min')->nullable();
+      $table->integer('salary_max')->nullable();
       $table->enum('job_type', ['full-time', 'part-time', 'contract']);
       $table->timestamps();
       $table->timestamp('posted_at')->useCurrent();

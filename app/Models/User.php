@@ -47,6 +47,18 @@ class User extends Authenticatable
       // 'password' => 'hashed',
     ];
   }
+
+  public function setEmailAttribute($value)
+  {
+    $this->attributes['email'] = strtolower($value);
+  }
+
+  public function setUserTypeAttribute($value)
+  {
+    $this->attributes['user_type'] = strtolower($value);
+  }
+
+  // relationships
   public function userprofile()
   {
     return $this->hasOne(User_profile::class);
@@ -87,5 +99,21 @@ class User extends Authenticatable
   public function payment()
   {
     return $this->hasMany(Payment::class, 'user_id');
+  }
+  public function reviewer()
+  {
+    return $this->belongsTo(Review::class, 'reviewer_id');
+  }
+  public function reviewee()
+  {
+    return $this->belongsTo(Review::class, 'reviewee_id');
+  }
+  public function user_bank_details()
+  {
+    return $this->hasOne(UserBankDetail::class, "user_id");
+  }
+  public function transfer_recipient()
+  {
+    return $this->hasOne(Recipient::class, "user_bank_details_id");
   }
 }

@@ -14,10 +14,10 @@ return new class extends Migration
     Schema::create('talent_profiles', function (Blueprint $table) {
       $table->id();
       $table->foreignId('user_profile_id')->constrained()->cascadeOnDelete();
-      $table->json('skills')->nullable();
-      $table->json('experience')->nullable();
-      $table->json('education')->nullable();
-      $table->json('portfolio')->nullable();
+      $table->json('skills');
+      $table->json('experience');
+      $table->json('education');
+      $table->json('portfolio');
       $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
       $table->timestamps();
     });

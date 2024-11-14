@@ -29,11 +29,29 @@ class ReviewController extends Controller
     }
   }
 
+  // Get the totla no of reviews
+  public function count()
+  {
+    try {
+      $review_count = Review::count();
+
+      return response()->json([
+        "message" => "Review count retrieved successfully.",
+        "data" => [
+          "count" => $review_count
+        ]
+      ]);
+    } catch (Exception $e) {
+      // Return error message if the retrieval fails
+      return response()->json(['message' => 'Failed to retrieve review count', 'error' => $e->getMessage()], 500);
+    }
+  }
+
   // Show a specific review
   public function show(Review $review)
   {
     // Authorize the user to view the review using the "view" policy
-    Gate::authorize("view", $review);
+    Gate::authorize("update", $review);
 
     try {
       // Return the review details
@@ -59,9 +77,9 @@ class ReviewController extends Controller
       $review = Review::create($validated);
 
       DB::commit(); // Commit transaction if successful
-
+      $review->refresh();
       // Return the created review data
-      return new ReviewResource($review);
+      return ['message' => 'Review created successsfully', "data" => new ReviewResource($review)];
     } catch (Exception $e) {
       DB::rollBack(); // Rollback transaction if there's an error
       return response()->json(['message' => 'Failed to create review', 'error' => $e->getMessage()], 500);
@@ -86,7 +104,7 @@ class ReviewController extends Controller
       DB::commit(); // Commit transaction if successful
 
       // Return the updated review data
-      return new ReviewResource($review);
+      return ['message' => 'Review updated successsfully', "data" => new ReviewResource($review)];
     } catch (Exception $e) {
       DB::rollBack(); // Rollback transaction if there's an error
       return response()->json(['message' => 'Failed to update review', 'error' => $e->getMessage()], 500);
@@ -122,9 +140,9 @@ class ReviewController extends Controller
       // Set the review status to 'approved'
       $review->status = 'approved';
       $review->save(); // Save the change
-
+      $review->refresh();
       // Return success message
-      return response()->json(["message" => "Review has been approved successfully"]);
+      return response()->json(["message" => "Review has been approved successfully", "data" => new ReviewResource($review)]);
     } catch (Exception $e) {
       // Return error message if the approval fails
       return response()->json(['message' => 'Failed to approve review', 'error' => $e->getMessage()], 500);
@@ -139,8 +157,9 @@ class ReviewController extends Controller
       $review->status = 'rejected';
       $review->save(); // Save the change
 
+      $review->refresh();
       // Return success message
-      return response()->json(["message" => "Review has been rejected successfully"]);
+      return response()->json(["message" => "Review has been rejected successfully", "data" => new ReviewResource($review)]);
     } catch (Exception $e) {
       // Return error message if the rejection fails
       return response()->json(['message' => 'Failed to reject review', 'error' => $e->getMessage()], 500);

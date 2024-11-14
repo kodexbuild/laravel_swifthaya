@@ -24,10 +24,18 @@ class StoreProjectRequest extends FormRequest
     return [
       'title' => 'required|string|max:255',
       'description' => 'required|string',
-      'required_skills' => 'nullable|string',
-      'budget' => 'nullable|numeric|min:0',
-      'duration' => 'nullable|integer|min:1',
+      'required_skills' => 'nullable|array',
+      'budget' => 'required|numeric|min:0',
+      'duration' => ['required', 'integer', 'min:1'],  // Ensure duration is a positive integer and at least 1 hour
       'deadline_date' => 'nullable|date|after_or_equal:posted_at',
+    ];
+  }
+  public function messages()
+  {
+    return [
+      'duration.required' => 'The duration in hours is required.',
+      'duration.integer' => 'The duration must be a valid integer representing the number of hours.',
+      'duration.min' => 'The duration must be at least 1 hour.',
     ];
   }
 }

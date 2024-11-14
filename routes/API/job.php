@@ -4,10 +4,14 @@ use App\Http\Controllers\API\V1\SwifthayajobController;
 use App\Http\Controllers\API\V1\TrackingController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:sanctum', 'can:company'])->prefix('/jobs')->group(function () {
+
+// job search
+Route::get("/jobs/search", [SwifthayajobController::class, "job_search"])->middleware(['auth:sanctum', "can:talent"]);
+
+Route::middleware(['auth:sanctum', 'can:company'])->prefix("/jobs")->group(function () {
 
   // List all jobs
-  Route::get('/', [SwifthayajobController::class, 'index']);
+  Route::get('', [SwifthayajobController::class, 'index']);
 
   // Show a single job
   Route::get('/{job}', [SwifthayajobController::class, 'show']);
@@ -23,7 +27,6 @@ Route::middleware(['auth:sanctum', 'can:company'])->prefix('/jobs')->group(funct
 });
 
 
-Route::get("/job_search", [SwifthayajobController::class, "job_search"])->middleware(['aut:sanctum', "can:talent"]);
 
 // job tracking
 // Route::get('/job_tracking/pending', [TrackingController::class, 'pendingJob']);
