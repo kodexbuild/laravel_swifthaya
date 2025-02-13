@@ -7,6 +7,7 @@ use App\Http\Requests\StoreTalent_profileRequest;
 use App\Http\Resources\ProjectResource;
 use App\Http\Resources\SwifthayajobResource;
 use App\Http\Resources\TalentProfileResource;
+use App\Http\Resources\UserResource;
 use App\Models\Project;
 use App\Models\Swifthayajob;
 use App\Models\Talent_profile;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TalentProfileController extends Controller
 {
@@ -61,8 +63,6 @@ class TalentProfileController extends Controller
         // $query->whereRaw("JSON_CONTAINS(experience, '\"" . $experience . "\"', '$[*].duration')");
 
         $query->whereJsonContains('experience', ['duration' => (string)$experience]);
-
-        
       }
 
       // test
@@ -86,110 +86,185 @@ class TalentProfileController extends Controller
       return response()->json(['message' => 'Failed to fetch Talents', 'error' => $e->getMessage()], 500);
     }
   }
-  public function show()
+
+  public function show(Talent_profile $talent_profile)
   {
     try {
-      $talent_profile = Auth::user()->userprofile->talentprofile;
-      if (!$talent_profile) {
-        return response()->json(["message" => "User has no Talent Profile"], 404);
-      }
       Gate::authorize("view", $talent_profile);
-      return new TalentProfileResource($talent_profile);
+      $talent_profile->load("userprofile");
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Talent Profile fetched successfully',
+        'data' => new TalentProfileResource($talent_profile),
+      ]);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback in case of failure
-      return response()->json(['message' => 'Failed to fetch Talent Profile', 'error' => $e->getMessage()], 500);
+      return response()->json(
+        [
+          'status' => 'error',
+          'code' => 500,
+          'message' => 'Failed to fetch Talent Profile'
+        ],
+        500
+      );
     }
   }
 
-  public function store(StoreTalent_profileRequest $request)
+  // public function store(StoreTalent_profileRequest $request)
+  // {
+  //   DB::beginTransaction(); // Begin DB transaction
+
+  //   try {
+  //     $user_profile = Auth::user()->userprofile;
+  //     $has_talent_profile = Talent_profile::where("user_profile_id", $user_profile->id)->first();
+
+  //     // check if user already has Talent profile
+  //     if (!is_null($has_talent_profile)) {
+  //       Gate::authorize("update", $has_talent_profile);
+  //       DB::commit(); // Commit if no changes are required
+
+  //       return response()->json([
+  //         'message' => "User already has a Talent Profile",
+  //       ], 409);
+  //     }
+
+
+  //     $validated = $request->validated();
+
+  //     // create talent profile
+  //     $talent_profile = $user_profile->talentprofile()->create([
+  //       'user_profile_id' => $user_profile->id,
+  //       'skills' => $validated["skills"],
+  //       'experience' => $validated["experience"],
+  //       'education' => $validated["education"],
+  //       'portfolio' => $validated["portfolio"]
+  //     ]);
+
+  //     $talent_profile->refresh(); // Reload the model to get the default values (e.g., pending status)
+
+  //     DB::commit(); // Commit transaction on success
+
+  //     return [
+  //       'message' => "Talent profile created successfully",
+  //       "data" => new TalentProfileResource($talent_profile)
+  //     ];
+  //   } catch (Exception $e) {
+  //     DB::rollBack(); // Rollback in case of failure
+  //     return response()->json(['message' => 'Failed to create Talent Profile', 'error' => $e->getMessage()], 500);
+  //   }
+  // }
+
+
+
+  public function update(StoreTalent_profileRequest $request, User_profile $user_profile)
   {
+    Gate::authorize("update", $user_profile);
+
     DB::beginTransaction(); // Begin DB transaction
 
     try {
-      $user_profile = Auth::user()->userprofile;
-      $has_talent_profile = Talent_profile::where("user_profile_id", $user_profile->id)->first();
+      $validated = $request->validated();
 
-      // check if user already has Talent profile
-      if (!is_null($has_talent_profile)) {
-        Gate::authorize("update", $has_talent_profile);
-        DB::commit(); // Commit if no changes are required
+      $talent_profile = $user_profile->talentprofile;
 
-        return response()->json([
-          'message' => "User already has a Talent Profile",
-        ], 409);
+      // update user profile
+      $user_profile->update([
+        'first_name' => $validated["first_name"],
+        'last_name' => $validated["last_name"]
+      ]);
+
+      if ($talent_profile) {
+        // Update existing talent profile
+        $talent_profile->update($validated);
       }
 
-
-      $validated = $request->validated();
 
       // create talent profile
-      $talent_profile = $user_profile->talentprofile()->create([
-        'user_profile_id' => $user_profile->id,
-        'skills' => $validated["skills"],
-        'experience' => $validated["experience"],
-        'education' => $validated["education"],
-        'portfolio' => $validated["portfolio"]
-      ]);
-
-      $talent_profile->refresh(); // Reload the model to get the default values (e.g., pending status)
-
-      DB::commit(); // Commit transaction on success
-
-      return [
-        'message' => "Talent profile created successfully",
-        "data" => new TalentProfileResource($talent_profile)
-      ];
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback in case of failure
-      return response()->json(['message' => 'Failed to create Talent Profile', 'error' => $e->getMessage()], 500);
-    }
-  }
-
-  public function update(StoreTalent_profileRequest $request)
-  {
-    $talent_profile = Auth::user()->userprofile->talentprofile;
-    Gate::authorize("update", $talent_profile);
-
-    DB::beginTransaction(); // Begin DB transaction
-
-    try {
-      $validated = $request->validated();
-
-      // update talent profile
-      $talent_profile->update([
-        'skills' => $validated["skills"] ?? $talent_profile->skills,
-        'experience' => $validated["experience"] ?? $talent_profile->experience,
-        'education' => $validated["education"] ?? $talent_profile->education,
-        'portfolio' => $validated["portfolio"] ?? $talent_profile->portfolio,
-      ]);
+      $user_profile->talentprofile()->create($validated);
 
 
-      DB::commit(); // Commit transaction on success
-
-      return ["message" => "Talent profile updated successfully", "data" => new TalentProfileResource($talent_profile)];
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback on failure
-      return response()->json(['message' => 'Failed to update Talent Profile', 'error' => $e->getMessage()], 500);
-    }
-  }
-
-  public function destroy(Talent_profile $talent_profile)
-  {
-    Gate::authorize("delete", $talent_profile);
-
-    DB::beginTransaction(); // Begin DB transaction
-
-    try {
-      $talent_profile->delete();
-      $talent_profile->userprofile->user->delete();
       DB::commit(); // Commit transaction on success
 
       return response()->json([
-        "message"  => "Talent Profile deleted successfully"
+        'status' => 'success',
+        'message' => "Talent Profile updated successfully",
+        "data" => new TalentProfileResource($talent_profile)
       ]);
     } catch (Exception $e) {
-      DB::rollBack(); // Rollback in case of failure
-      return response()->json(['message' => 'Failed to delete Talent Profile', 'error' => $e->getMessage()], 500);
+      Log::channel('api')->error($e->getMessage());
+      DB::rollBack(); // Rollback on failure
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'message' => 'Failed to update Talent Profile',
+      ], 500);
     }
   }
+
+
+  public function uploadResume(Request $request, Talent_profile $talent_profile)
+  {
+    // Authorize the user to update this talent profile
+    Gate::authorize('update', $talent_profile);
+
+    DB::beginTransaction(); // Begin DB transaction
+
+    try {
+      // Validate the incoming resume file
+      $validated = $request->validate([
+        'resume' => 'required|file|mimes:pdf,doc,docx|max:2048', // Adjust file types and size as needed
+      ]);
+
+      // Delete the existing resume file if it exists
+      if ($request->has("resume")) {
+        // stor file in public folder
+        $imagePath = $request->file("resume")->store("resume", "public");
+
+        $validated = $imagePath;
+
+        // deleting previous image to store new one 
+        Storage::disk("public")->delete($talent_profile->resume ?? "");
+
+        $talent_profile->resume = $validated;
+        $talent_profile->update(["resume" => $validated]);
+      }
+
+      DB::commit(); // Commit transaction on success
+
+      return response()->json([
+        'status' => 'success',
+        'message' => 'Resume uploaded successfully',
+        'data' => new TalentProfileResource($talent_profile)
+      ]);
+    } catch (Exception $e) {
+      DB::rollBack(); // Rollback on failure
+      Log::channel('api')->error($e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'message' => 'Failed to upload resume',
+        'error' => $e->getMessage()
+      ], 500);
+    }
+  }
+
+  // public function destroy(Talent_profile $talent_profile)
+  // {
+  //   Gate::authorize("delete", $talent_profile);
+
+  //   DB::beginTransaction(); // Begin DB transaction
+
+  //   try {
+  //     $talent_profile->delete();
+  //     $talent_profile->userprofile->user->delete();
+  //     DB::commit(); // Commit transaction on success
+
+  //     return response()->json([
+  //       "message"  => "Talent Profile deleted successfully"
+  //     ]);
+  //   } catch (Exception $e) {
+  //     DB::rollBack(); // Rollback in case of failure
+  //     return response()->json(['message' => 'Failed to delete Talent Profile', 'error' => $e->getMessage()], 500);
+  //   }
+  // }
 }

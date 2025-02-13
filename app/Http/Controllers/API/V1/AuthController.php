@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
+use App\Http\Resources\CompanyProfileResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use App\Models\User_profile;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -20,7 +22,7 @@ class AuthController extends Controller
   /**
    * Register a new user.
    */
-  public function register(RegisterUserRequest $request)
+  public function register_individual(RegisterUserRequest $request)
   {
     DB::beginTransaction(); // Start transaction
 
@@ -32,7 +34,7 @@ class AuthController extends Controller
       $user = User::create([
         'email' => $validated["email"],
         'password' => Hash::make($validated["password"]),
-        'user_type' => $validated["user_type"],
+        'user_type' => "individual",
       ]);
 
       // Create the user profile if user creation is successful
@@ -41,10 +43,10 @@ class AuthController extends Controller
           'user_id' => $user->id,
           'first_name' => $validated["first_name"],
           'last_name' => $validated["last_name"],
-          "bio" => $validated["bio"],
-          "location" => $validated["location"],
+          'street_address' => $validated["street_address"],
+          'city' => $validated["city"],
+          'state' => $validated["state"],
           "phone_number" => $validated["phone_number"],
-          "website" => $validated["website"]
         ]);
 
         // Create an API token for the user
@@ -57,6 +59,8 @@ class AuthController extends Controller
 
         // Return the user data and token
         return response()->json([
+          'status' => 'success',
+          'message' => 'User registration successful',
           "data" => new UserResource($user),
           "token" => $token
         ], 201);
@@ -66,8 +70,131 @@ class AuthController extends Controller
     } catch (Exception $e) {
       DB::rollBack(); // Rollback transaction on error
       return response()->json([
-        'message' => 'User registration failed',
-        'error' => $e->getMessage()
+        'status' => 'error',
+        'code' => 500,
+        'error' => [
+          'code' => 'SERVER_ERROR',
+          'message' => 'User registration failed',
+        ]
+      ], 500);
+    }
+  }
+  public function register_company(RegisterUserRequest $request)
+  {
+    DB::beginTransaction(); // Start transaction
+
+    try {
+
+      // Validate the request data
+      $validated = $request->validated();
+      // Create the user
+      $user = User::create([
+        'email' => $validated["email"],
+        'password' => Hash::make($validated["password"]),
+        'user_type' => 'company',
+      ]);
+
+      // Create the user profile if user creation is successful
+      if ($user) {
+        $user_profile = $user->userprofile()->create([
+          'user_id' => $user->id,
+          'street_address' => $validated["street_address"],
+          'city' => $validated["city"],
+          'state' => $validated["state"],
+          "phone_number" => $validated["phone_number"],
+        ]);
+
+
+        // Create the company profile
+        $company_profile = $user_profile->companyprofile()->create([
+          'user_profile_id' => $user_profile->id,
+          'company_name' => $validated["company_name"],
+          'company_website' => $validated["company_website"],
+          'industry' => $validated["industry"],
+        ]);
+      }
+
+      // Create an API token for the user
+      $token = $user->createToken('API Token')->plainTextToken;
+      $company_profile->refresh(); // Reload to get the default values
+      $company_profile->load("userprofile");
+
+
+      DB::commit(); // Commit transaction
+
+      return response()->json([
+        "message" => "Company profile created successfully",
+        "data" => new CompanyProfileResource($company_profile),
+        "token" => $token
+      ], 201); // 201 Created
+
+      throw new Exception('User registration failed');
+    } catch (Exception $e) {
+      Log::channel('api')->error("debuggu", ["error" => $e->getMessage()]);
+      DB::rollBack(); // Rollback transaction on error
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'error' => [
+          'code' => 'SERVER_ERROR',
+          'message' => 'User registration failed',
+        ]
+      ], 500);
+    }
+  }
+  
+  public function register_talent(RegisterUserRequest $request)
+  {
+    DB::beginTransaction(); // Start transaction
+
+    try {
+
+      // Validate the request data
+      $validated = $request->validated();
+      // Create the user
+      $user = User::create([
+        'email' => $validated["email"],
+        'password' => Hash::make($validated["password"]),
+        'user_type' => 'talent',
+      ]);
+
+      // Create the user profile if user creation is successful
+      if ($user) {
+        $user->userprofile()->create([
+          'user_id' => $user->id,
+          'first_name' => $validated["first_name"],
+          'last_name' => $validated["last_name"],
+          'street_address' => $validated["street_address"],
+          'city' => $validated["city"],
+          'state' => $validated["state"],
+          "phone_number" => $validated["phone_number"],
+        ]);
+
+        // Create an API token for the user
+        $token = $user->createToken('API Token')->plainTextToken;
+
+        // Refresh the user to ensure we retrieve the latest values
+        $user->refresh();
+        $user->load("userprofile");
+        DB::commit(); // Commit transaction
+
+        // Return the user data and token
+        return response()->json([
+          "status" => "success",
+          "message" => "User registered successfully",
+          "data" => new UserResource($user),
+          "token" => $token
+        ], 201);
+      }
+    } catch (Exception $e) {
+      DB::rollBack(); // Rollback transaction on error
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'error' => [
+          'code' => 'SERVER_ERROR',
+          'message' => 'User registration failed',
+        ]
       ], 500);
     }
   }
@@ -100,16 +227,29 @@ class AuthController extends Controller
       DB::commit(); // Commit transaction
 
       return response()->json([
+        'status' => 'success',
         'message' => 'Login successful',
         "data" => new UserResource($user),
         'token' => $token,
       ], 200);
     } catch (ValidationException $e) {
       DB::rollBack(); // Rollback transaction on validation error
-      return response()->json(['errors' => $e->errors()], 401);
+
+      return response()->json([
+        'status' => 'error',
+        'message' => 'The provided credentials are incorrect. ',
+        'suggestion' => 'Please input the correct email and password',
+      ], 401);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback on any other errors
-      return response()->json(['message' => 'Login failed', 'error' => $e->getMessage()], 500);
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'error' => [
+          'code' => 'SERVER_ERROR',
+          'message' => 'Login failed',
+        ]
+      ], 500);
     }
   }
 
@@ -127,8 +267,12 @@ class AuthController extends Controller
       ], 200);
     } catch (Exception $e) {
       return response()->json([
-        'message' => 'Logout failed',
-        'error' => $e->getMessage()
+        'status' => 'error',
+        'code' => 500,
+        'error' => [
+          'code' => 'SERVER_ERROR',
+          'message' => 'Logout failed',
+        ]
       ], 500);
     }
   }

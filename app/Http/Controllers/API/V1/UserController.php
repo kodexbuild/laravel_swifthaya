@@ -26,34 +26,38 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
-  public function show()
+  public function show(User $user)
   {
-    $user = Auth::user();
-
     Gate::authorize("view", Auth::user()->userprofile);
+    $user->load("userprofile");
     try {
       return response()->json([
+        'status' => 'success',
+        'message' => 'User data fetched successfully',
         "data" => new UserResource($user),
       ], 200);
     } catch (Exception $e) {
       return response()->json([
-        "message" => "Failed to retrieve User",
-        "error" => $e->getMessage()
+        'status' => 'error',
+        'code' => 500,
+        "error" => [
+          'code' => 'SERVER_ERROR',
+          "message" => "Failed to fetch user data",
+        ]
       ], 500);
     }
   }
 
-  public function update(UpdateUserRequest $request)
+  public function update(User $user, UpdateUserRequest $request)
   {
     DB::beginTransaction(); // Start transaction
 
     try {
-      $user = User::findorFail(Auth::user()->id);
 
       // Validate the request data
       $validated = $request->validated();
       // checking if email already exists
-      $existingUser = User::where('email', $validated["email"])->first();
+      $existingUser = User::where('email', $user->email)->first();
 
       if ($existingUser && $existingUser->id !== $user->id) {
         return response()->json([
@@ -64,12 +68,11 @@ class UserController extends Controller
 
       // Create the user
       $user->update([
-        'email' => $validated["email"],
+        // 'email' => $validated["email"] ?? $user->email,
         'password' => $user->password,
       ]);
 
-      // Create the user profile if user creation is successful
-      if ($user) {
+      
         $user->userprofile->update([
           'first_name' => $validated["first_name"] ?? $user->userprofile->first_name,
           'last_name' => $validated["last_name"] ?? $user->userprofile->last_name,
@@ -87,11 +90,13 @@ class UserController extends Controller
 
         // Return the user data and token
         return response()->json([
+          'status' => 'success',
+          'message' => 'User updated successfully',
           "data" => new UserResource($user),
         ], 201);
-      }
+      
 
-      throw new Exception('User registration failed');
+     
     } catch (Exception $e) {
       DB::rollBack(); // Rollback transaction on error
       return response()->json([
@@ -338,6 +343,7 @@ class UserController extends Controller
       ], 500);
     }
   }
+
   public function destroy(Request $request)
   {
     try {

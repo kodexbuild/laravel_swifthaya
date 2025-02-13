@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 // project search
 Route::get("/projects/search", [ProjectController::class, "project_search"])->middleware(['auth:sanctum', "can:talent"]);
 
-Route::middleware(['auth:sanctum', "can:individual_company"])->prefix("/projects")->group(function () {
+Route::prefix("/projects")->group(function () {
 
   // List all projects
   Route::get("/", [ProjectController::class, "index"]);

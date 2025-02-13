@@ -17,10 +17,15 @@ class TalentProfileResource extends JsonResource
     return [
       'id' => $this->id,
       'user_profile_id' => $this->user_profile_id,
-      'skills' => json_decode($this->skills),
-      'experience' => json_decode($this->experience),
-      'education' => json_decode($this->education),
-      'portfolio' => json_decode($this->portfolio),
+      'job_title' => $this->job_title,
+      'professional_bio' => $this->professional_bio,
+      'tech_skills' => $this->tech_skills,
+      'soft_skills' => $this->soft_skills,
+      'linkedin_url' => $this->linkedin_url,
+      'github_url' => $this->github_url,
+      'twitter_url' => $this->twitter_url,
+      'portfolio_url' => $this->portfolio_url,
+      'resume' => $this->resume,
       'status' => $this->status,
       'user' => new UserResource($this->userprofile->user),  // Including user 
     ];

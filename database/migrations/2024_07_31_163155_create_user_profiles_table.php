@@ -18,7 +18,9 @@ return new class extends Migration
       $table->string('last_name');
       $table->string('profile_picture')->nullable();
       $table->text('bio')->nullable();
-      $table->string('location')->nullable();
+      $table->string('street_address')->nullable();
+      $table->string('city')->nullable();
+      $table->string('state')->nullable();
       $table->string('phone_number', 20)->nullable();  // 20 characters to accommodate country codes and separators
       $table->string('website')->nullable();
       $table->timestamps();

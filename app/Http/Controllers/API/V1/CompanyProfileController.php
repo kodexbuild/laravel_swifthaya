@@ -61,10 +61,9 @@ class CompanyProfileController extends Controller
           'user_id' => $user->id,
           'first_name' => $validated["first_name"],
           'last_name' => $validated["last_name"],
-          "bio" => $validated["bio"],
           "location" => $validated["location"],
           "phone_number" => $validated["phone_number"],
-          "website" => $validated["website"]
+          // "website" => $validated["website"]
         ]);
 
 
@@ -72,9 +71,8 @@ class CompanyProfileController extends Controller
         $company_profile = $user_profile->companyprofile()->create([
           'user_profile_id' => $user_profile->id,
           'company_name' => $validated["company_name"],
+          'company_website' => $validated["company_website"],
           'industry' => $validated["industry"],
-          'company_size' => $validated["company_size"],
-          'founded_year' => $validated["founded_year"],
         ]);
       }
 

@@ -21,7 +21,9 @@ class UserProfileResource extends JsonResource
       'last_name' => $this->last_name,
       'profile_picture' => $this->profile_picture,
       'bio' => $this->bio,
-      'location' => $this->location,
+      'street_address' => $this->street_address,
+      'city' => $this->city,
+      'state' => $this->state,
       'phone_number' => $this->phone_number,
       'website' => $this->website,
     ];

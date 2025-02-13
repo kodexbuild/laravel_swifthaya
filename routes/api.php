@@ -12,28 +12,31 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Authentication and Registeration routes
-Route::post('/login', [AuthController::class, "login"])->middleware('guest');
-Route::post('/register', [AuthController::class, "register"])->middleware('guest');
-
+Route::middleware(['guest'])->group(function () {
+  Route::post('/login', [AuthController::class, "login"]);
+  Route::post('/register_talent', [AuthController::class, "register_talent"]);
+  Route::post('/register_company', [AuthController::class, "register_company"]);
+  Route::post('/register_individual', [AuthController::class, "register_individual"]);
+});
 Route::middleware(['auth:sanctum'])->group(function () {
 
   Route::post('/logout', [AuthController::class, "logout"]);
 
   // User and Userprofile
-  Route::get('user', [UserController::class, "show"]);
+  Route::get('users/{user}', [UserController::class, "show"]);
   // update
-  Route::patch('user', [UserController::class, "update"]);
+  Route::patch('users{user}', [UserController::class, "update"]);
 
   // update / change password
-  Route::put('user/password', [UserController::class, "updatePassword"]);
+  Route::put('users/password', [UserController::class, "updatePassword"]);
 
   // update / change profile pic
-  Route::post('user/profile_picture', [UserController::class, "profile_img"]);
+  Route::post('users/profile_picture', [UserController::class, "profile_img"]);
 
   // create or update account details
-  Route::post('user/account', [UserController::class, "saveAccountDetails"]);
+  Route::post('users/account', [UserController::class, "saveAccountDetails"]);
   // delete
-  Route::delete('user', [UserController::class, "destroy"]);
+  Route::delete('users', [UserController::class, "destroy"]);
 });
 
 

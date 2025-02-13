@@ -13,10 +13,12 @@ class User_profile extends Model
     'user_id',
     'first_name',
     'last_name',
+    'street_address',
+    'city',
+    'state',
+    'phone_number',
     'profile_picture',
     'bio',
-    'location',
-    'phone_number',
     'website',
   ];
   // mutators
@@ -29,9 +31,13 @@ class User_profile extends Model
   {
     $this->attributes['last_name'] = strtolower($value);
   }
-  public function setLocationAttribute($value)
+  public function setCityAttribute($value)
   {
-    $this->attributes['location'] = strtolower($value);
+    $this->attributes['city'] = strtolower($value);
+  }
+  public function setStateAttribute($value)
+  {
+    $this->attributes['state'] = strtolower($value);
   }
   public function setWebsiteAttribute($value)
   {

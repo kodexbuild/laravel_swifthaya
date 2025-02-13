@@ -22,10 +22,18 @@ class StoreTalent_profileRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'skills' => 'required|array',
-      'experience' => 'required|array',
-      'education' => 'required|array',
-      'portfolio' => 'required|array',
+      'first_name' => 'required|string',
+      'last_name' => 'required|string',
+      'job_title' => 'required|string',
+      'professional_bio' => 'required|string',
+      'tech_skills' => 'required|array',
+      'tech_skills.*' => 'string',
+      'soft_skills' => 'required|array',
+      'soft_skills.*' => 'string',
+      'linkedin_url' => 'nullable|string',
+      'github_url' => 'nullable|string',
+      'twitter_url' => 'nullable|string',
+      'portfolio_url' => 'nullable|string',
     ];
   }
 }
