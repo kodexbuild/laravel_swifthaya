@@ -16,5 +16,5 @@ Route::middleware(['auth:sanctum', "can:company"])->prefix("/companies")->group(
   Route::patch("/{company_profile}", [CompanyProfileController::class, "update"]);
 
   // Company logo upload
-  Route::put('/companies/{id}/logo', [CompanyProfileController::class, 'uploadLogo']);
+  Route::post('/{company_profile}/logo', [CompanyProfileController::class, 'uploadLogo']);
 });
