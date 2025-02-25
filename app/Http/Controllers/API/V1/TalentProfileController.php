@@ -201,12 +201,41 @@ class TalentProfileController extends Controller
     }
   }
 
+  public function uploadPhoto(Request $request, Talent_profile $talent_profile)
+  {
+    Gate::authorize('update', $talent_profile);
+
+    // Validate the uploaded profile_pic
+    $request->validate([
+      'profile_pic' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+
+    // Delete the existing profile_pic file if it exists
+    if ($request->has("profile_pic")) {
+      // stor file in public folder
+      $imagePath = $request->file("profile_pic")->store("talentProfilePic", "public");
+
+      $validated = $imagePath;
+
+      // deleting previous image to store new one 
+      Storage::disk("public")->delete($talent_profile->profile_pic ?? "");
+
+      $talent_profile->profile_pic = $validated;
+      $talent_profile->update(["profile_pic" => $validated]);
+    }
+
+    return response()->json([
+      'status' => 'success',
+      'message' => "Talent's profile picture uploaded successfully",
+      'data' => $imagePath,
+    ]);
+  }
 
   public function uploadResume(Request $request, Talent_profile $talent_profile)
   {
     // Authorize the user to update this talent profile
     Gate::authorize('update', $talent_profile);
-
     DB::beginTransaction(); // Begin DB transaction
 
     try {
@@ -238,7 +267,7 @@ class TalentProfileController extends Controller
       ]);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback on failure
-      Log::channel('api')->error($e->getMessage());
+      Log::channel('api')->error("resume upload", ["error", $e->getMessage()]);
       return response()->json([
         'status' => 'error',
         'code' => 500,

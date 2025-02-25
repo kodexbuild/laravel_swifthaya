@@ -35,9 +35,6 @@ class RegisterUserRequest extends FormRequest
       'city' => ['nullable', 'string', 'max:255'],
       'state' => ['nullable', 'string', 'max:255'],
       'phone_number' => ['required', 'string', 'regex:/^(070|080|081|090|091)[0-9]{7,8}$/'], // Must be a Nigerian phone number      
-      'company_name' => ['sometimes', 'string', 'max:255'],
-      'company_website' => ['sometimes', 'url', 'max:255'],
-      'industry' => ['sometimes', 'string', 'max:255'],
     ];
   }
   public function messages()

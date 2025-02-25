@@ -16,31 +16,35 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; // Add logging
 use Exception;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyProfileController extends Controller
 {
   // Show company profile
-  public function show()
+  public function show(Company_profile $company_profile)
   {
     try {
-      $company_profile = Auth::user()->userprofile->companyprofile;
-      if (!$company_profile) {
-        // Return a 404 status for not found
-        return response()->json(["message" => "User has no company profile"], 404);
-      }
-
       Gate::authorize("modify", $company_profile);
 
-      return new CompanyProfileResource($company_profile);
+      return response()->json([
+        "status" => "success",
+        "message" => "Company profile retrieved successfully",
+        "data" => new CompanyProfileResource($company_profile)
+      ], 200); // 200 OK
     } catch (Exception $e) {
       // Log the error for debugging
       Log::error('Error retrieving company profile', ['error' => $e->getMessage()]);
-      return response()->json(['message' => 'Failed to fetch Company Profile', 'error' => $e->getMessage()], 500);
+
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'message' => 'Failed to retrieve company profile',
+      ], 500);
     }
   }
 
   // Store company profile
-  public function store(StoreCompany_profileRequest $request)
+  public function update(Company_profile $company_profile, StoreCompany_profileRequest $request)
   {
     DB::beginTransaction(); // Begin transaction
 
@@ -48,31 +52,37 @@ class CompanyProfileController extends Controller
 
       // Validate the request data
       $validated = $request->validated();
+      // return $validated;
+      $user = $company_profile->userprofile->user;
       // Create the user
-      $user = User::create([
+      $user->update([
         'email' => $validated["email"],
         'password' => Hash::make($validated["password"]),
-        'user_type' => "company",
       ]);
 
       // Create the user profile if user creation is successful
       if ($user) {
-        $user_profile = $user->userprofile()->create([
-          'user_id' => $user->id,
-          'first_name' => $validated["first_name"],
-          'last_name' => $validated["last_name"],
-          "location" => $validated["location"],
+        $user_profile = $user->userprofile()->update([
+          'street_address' => $validated["street_address"],
+          'city' => $validated["city"],
+          'state' => $validated["state"],
           "phone_number" => $validated["phone_number"],
-          // "website" => $validated["website"]
+          "bio" => $validated["bio"],
         ]);
 
 
         // Create the company profile
-        $company_profile = $user_profile->companyprofile()->create([
-          'user_profile_id' => $user_profile->id,
+        $company_profile->update([
           'company_name' => $validated["company_name"],
+          'company_slogan' => $validated["company_slogan"],
+          'company_size' => $validated["company_size"],
           'company_website' => $validated["company_website"],
+          'founded_year' => $validated["founded_year"] ?? $company_profile->founded_year,
           'industry' => $validated["industry"],
+          'linkedin_url' => $validated["linkedin_url"],
+          'github_url' => $validated["github_url"],
+          'twitter_url' => $validated["twitter_url"],
+          'instagram_url' => $validated["instagram_url"]
         ]);
       }
 
@@ -85,45 +95,58 @@ class CompanyProfileController extends Controller
       DB::commit(); // Commit transaction
 
       return response()->json([
+        "status" => "success",
         "message" => "Company profile created successfully",
         "data" => new CompanyProfileResource($company_profile),
         "token" => $token
       ], 201); // 201 Created
     } catch (Exception $e) {
       DB::rollBack(); // Rollback on error
-      Log::error('Error creating company profile', ['error' => $e->getMessage()]);
-      return response()->json(['message' => 'Failed to create company profile', 'error' => $e->getMessage()], 500);
-    }
-  }
-
-  // Update company profile
-  public function update(UpdateCompany_profileRequest $request)
-  {
-    DB::beginTransaction(); // Begin transaction
-
-    try {
-      $validated = $request->validated();
-      $company = Auth::user()->userprofile->companyprofile;
-      // Update the company profile
-      $company->update([
-        'company_name' => $validated["company_name"] ?? $company->company_name,
-        'industry' => $validated["industry"] ?? $company->industry,
-        'company_size' => $validated["company_size"] ?? $company->company_size,
-        'founded_year' =>  $validated["founded_year"] ?? $company->founded_year,
-      ]);
-
-      DB::commit(); // Commit transaction
+      // Log the error for debugging
+      Log::channel("api")->error('Error creating company profile', ['error' => $e->getMessage()]);
 
       return response()->json([
-        "message" => "Company profile updated successfully",
-        "data" => new CompanyProfileResource($company)
-      ], 200); // 200 OK
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback on error
-      Log::error('Error updating company profile', ['error' => $e->getMessage()]);
-      return response()->json(['message' => 'Failed to update company profile', 'error' => $e->getMessage()], 500);
+        'status' => 'error',
+        'code' => 500,
+        'message' => 'Failed to create company profile',
+      ], 500);
     }
   }
+
+  /**
+   * Upload company logo.
+   */
+  public function uploadLogo(Request $request, Company_profile $company_profile)
+  {
+    Gate::authorize('update', $company_profile);
+
+    // Validate the uploaded logo
+    $request->validate([
+      'logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+
+    // Delete the existing logo file if it exists
+    if ($request->has("logo")) {
+      // stor file in public folder
+      $imagePath = $request->file("logo")->store("companyLogo", "public");
+
+      $validated = $imagePath;
+
+      // deleting previous image to store new one 
+      Storage::disk("public")->delete($company_profile->logo ?? "");
+
+      $company_profile->logo = $validated;
+      $company_profile->update(["logo" => $validated]);
+    }
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Company logo uploaded successfully',
+      'data' => $imagePath,
+    ]);
+  }
+
 
   // Delete company profile
   public function destroy(Company_profile $company)

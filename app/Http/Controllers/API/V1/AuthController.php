@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
+use App\Http\Requests\StoreCompany_profileRequest;
 use App\Http\Resources\CompanyProfileResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -79,7 +80,7 @@ class AuthController extends Controller
       ], 500);
     }
   }
-  public function register_company(RegisterUserRequest $request)
+  public function register_company(StoreCompany_profileRequest $request)
   {
     DB::beginTransaction(); // Start transaction
 
@@ -142,7 +143,7 @@ class AuthController extends Controller
       ], 500);
     }
   }
-  
+
   public function register_talent(RegisterUserRequest $request)
   {
     DB::beginTransaction(); // Start transaction

@@ -18,6 +18,7 @@ return new class extends Migration
       $table->text('professional_bio')->nullable();
       $table->json('tech_skills');
       $table->json('soft_skills');
+      $table->string('profile_pic')->nullable();
       $table->string('linkedin_url')->nullable();
       $table->string('github_url')->nullable();
       $table->string('twitter_url')->nullable();

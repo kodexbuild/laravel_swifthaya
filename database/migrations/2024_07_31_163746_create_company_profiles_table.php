@@ -14,10 +14,18 @@ return new class extends Migration
     Schema::create('company_profiles', function (Blueprint $table) {
       $table->id();
       $table->foreignId('user_profile_id')->constrained()->cascadeOnDelete();
+      $table->string('company_logo')->nullable();
       $table->string('company_name');
+      $table->string('company_slogan')->nullable();
       $table->string('industry');
-      $table->string('company_size');
+      $table->string('company_size')->nullable();
+      $table->string('company_website');
       $table->year('founded_year')->nullable();
+      // Social media links
+      $table->string('linkedin_url')->nullable();
+      $table->string('github_url')->nullable();
+      $table->string('twitter_url')->nullable();
+      $table->string('instagram_url')->nullable();
       $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
       $table->timestamps();
     });
