@@ -22,6 +22,7 @@ use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class TalentProfileController extends Controller
 {
@@ -154,27 +155,16 @@ class TalentProfileController extends Controller
 
   public function show(Talent_profile $talent_profile)
   {
-    try {
-      Gate::authorize("view", $talent_profile);
-      $talent_profile->load("userprofile");
-      return response()->json([
-        'status' => 'success',
-        'message' => 'Talent Profile fetched successfully',
-        'data' => new TalentProfileResource($talent_profile),
-      ]);
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback in case of failure
-      Log::channel('api')->error($e->getMessage());
-      return response()->json(
-        [
-          'status' => 'error',
-          'code' => 500,
-          'message' => 'Failed to fetch Talent Profile'
-        ],
-        500
-      );
-    }
+    Gate::authorize("view", $talent_profile);
+    $talent_profile->load("userprofile");
+
+    return response()->json([
+      'status' => 'success',
+      'message' => 'Talent Profile fetched successfully',
+      'data' => new TalentProfileResource($talent_profile),
+    ]);
   }
+
 
   // public function store(StoreTalent_profileRequest $request)
   // {
@@ -231,7 +221,7 @@ class TalentProfileController extends Controller
 
     try {
       $validated = $request->validated();
-      
+
       if (User::where('email', $validated['email'])->where('id', '!=', $user_profile->user->id)->exists()) {
         return response()->json([
           'status' => 'error',
@@ -284,30 +274,31 @@ class TalentProfileController extends Controller
   {
     Gate::authorize('update', $talent_profile);
 
-    // Validate the uploaded profile_pic
+    // Validate the uploaded profile_picture
     $request->validate([
-      'profile_pic' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+      'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
 
 
-    // Delete the existing profile_pic file if it exists
-    if ($request->has("profile_pic")) {
+    // Delete the existing profile_picture file if it exists
+    if ($request->has("profile_picture")) {
       // stor file in public folder
-      $imagePath = $request->file("profile_pic")->store("talentProfilePic", "public");
+      $imagePath = $request->file("profile_picture")->store("profile_picture", "public");
 
       $validated = $imagePath;
 
       // deleting previous image to store new one 
-      Storage::disk("public")->delete($talent_profile->profile_pic ?? "");
+      Storage::disk("public")->delete($talent_profile->userprofile->profile_picture ?? "");
 
-      $talent_profile->profile_pic = $validated;
-      $talent_profile->update(["profile_pic" => $validated]);
+      $talent_profile->profile_picture = $validated;
+      $talent_profile->userprofile()->update(["profile_picture" => $validated]);
+      $talent_profile->refresh();
     }
-
     return response()->json([
       'status' => 'success',
       'message' => "Talent's profile picture uploaded successfully",
-      'data' => $imagePath,
+      'data' => new TalentProfileResource($talent_profile)
+
     ]);
   }
 

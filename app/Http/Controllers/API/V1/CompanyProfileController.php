@@ -120,30 +120,31 @@ class CompanyProfileController extends Controller
   {
     Gate::authorize('update', $company_profile);
 
-    // Validate the uploaded logo
+    // Validate the uploaded profile_picture
     $request->validate([
-      'logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+      'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
 
 
-    // Delete the existing logo file if it exists
-    if ($request->has("logo")) {
+    // Delete the existing profile_picture file if it exists
+    if ($request->has("profile_picture")) {
       // stor file in public folder
-      $imagePath = $request->file("logo")->store("companyLogo", "public");
+      $imagePath = $request->file("profile_picture")->store("profile_picture", "public");
 
       $validated = $imagePath;
 
       // deleting previous image to store new one 
-      Storage::disk("public")->delete($company_profile->logo ?? "");
+      Storage::disk("public")->delete($company_profile->userprofile->profile_picture ?? "");
 
-      $company_profile->logo = $validated;
-      $company_profile->update(["logo" => $validated]);
+      $company_profile->profile_picture = $validated;
+      $company_profile->userprofile()->update(["profile_picture" => $validated]);
     }
+    $company_profile->refresh();
 
     return response()->json([
       'status' => 'success',
       'message' => 'Company logo uploaded successfully',
-      'data' => $imagePath,
+      'data' => new CompanyProfileResource($company_profile)
     ]);
   }
 

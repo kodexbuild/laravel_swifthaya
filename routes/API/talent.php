@@ -18,7 +18,7 @@ Route::middleware(['auth:sanctum', "can:talent"])->prefix("/talents")->group(fun
   Route::patch("/{talent_profile}", [TalentProfileController::class, "update"]);
 
   Route::post('/{talent_profile}/resume', [TalentProfileController::class, 'uploadResume']);
-  Route::post('/{talent_profile}/profile_pic', [TalentProfileController::class, 'uploadResume']);
+  Route::post('/{talent_profile}/profile_pic', [TalentProfileController::class, 'uploadPhoto']);
   
 
   // Delete a talent profile
