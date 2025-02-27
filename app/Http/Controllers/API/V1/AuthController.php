@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
 use App\Http\Requests\StoreCompany_profileRequest;
+use App\Http\Requests\StoreTalent_profileRequest;
 use App\Http\Resources\CompanyProfileResource;
 use App\Http\Resources\UserResource;
+use App\Models\Talent_profile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -144,61 +146,6 @@ class AuthController extends Controller
     }
   }
 
-  public function register_talent(RegisterUserRequest $request)
-  {
-    DB::beginTransaction(); // Start transaction
-
-    try {
-
-      // Validate the request data
-      $validated = $request->validated();
-      // Create the user
-      $user = User::create([
-        'email' => $validated["email"],
-        'password' => Hash::make($validated["password"]),
-        'user_type' => 'talent',
-      ]);
-
-      // Create the user profile if user creation is successful
-      if ($user) {
-        $user->userprofile()->create([
-          'user_id' => $user->id,
-          'first_name' => $validated["first_name"],
-          'last_name' => $validated["last_name"],
-          'street_address' => $validated["street_address"],
-          'city' => $validated["city"],
-          'state' => $validated["state"],
-          "phone_number" => $validated["phone_number"],
-        ]);
-
-        // Create an API token for the user
-        $token = $user->createToken('API Token')->plainTextToken;
-
-        // Refresh the user to ensure we retrieve the latest values
-        $user->refresh();
-        $user->load("userprofile");
-        DB::commit(); // Commit transaction
-
-        // Return the user data and token
-        return response()->json([
-          "status" => "success",
-          "message" => "User registered successfully",
-          "data" => new UserResource($user),
-          "token" => $token
-        ], 201);
-      }
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback transaction on error
-      return response()->json([
-        'status' => 'error',
-        'code' => 500,
-        'error' => [
-          'code' => 'SERVER_ERROR',
-          'message' => 'User registration failed',
-        ]
-      ], 500);
-    }
-  }
 
   /**
    * Log the user in.

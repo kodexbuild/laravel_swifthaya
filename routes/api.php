@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\API\V1\Admin\SwifthayajobController;
-use App\Http\Controllers\API\V1\Admin\TalentProfileController;
+
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\MessageController;
 use App\Http\Controllers\API\V1\ReviewController;
+use App\Http\Controllers\API\V1\TalentProfileController;
 use App\Http\Controllers\API\V1\UserController;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 // Authentication and Registeration routes
 Route::middleware(['guest'])->group(function () {
   Route::post('/login', [AuthController::class, "login"]);
-  Route::post('/register_talent', [AuthController::class, "register_talent"]);
+  Route::post('/register_talent', [TalentProfileController::class, "register_talent"]);
   Route::post('/register_company', [AuthController::class, "register_company"]);
   Route::post('/register_individual', [AuthController::class, "register_individual"]);
 });

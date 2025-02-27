@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules;
 
 class StoreCompany_profileRequest extends FormRequest
 {
@@ -24,11 +23,6 @@ class StoreCompany_profileRequest extends FormRequest
   {
     return [
       'email' => $this->getMethod() == "PATCH" ? ['required', 'email'] : ['required', 'email', 'unique:users'],
-      'password' => [
-        'required',
-        'confirmed',
-        Rules\Password::defaults()
-      ],
       'street_address' => ['nullable', 'string', 'max:255'],
       'city' => ['nullable', 'string', 'max:255'],
       'state' => ['nullable', 'string', 'max:255'],

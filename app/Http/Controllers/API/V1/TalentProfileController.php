@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RegisterUserRequest;
 use App\Http\Requests\StoreTalent_profileRequest;
 use App\Http\Resources\ProjectResource;
 use App\Http\Resources\SwifthayajobResource;
@@ -11,17 +12,81 @@ use App\Http\Resources\UserResource;
 use App\Models\Project;
 use App\Models\Swifthayajob;
 use App\Models\Talent_profile;
+use App\Models\User;
 use App\Models\User_profile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class TalentProfileController extends Controller
 {
+
+  public function register_talent(RegisterUserRequest $request)
+  {
+    DB::beginTransaction(); // Start transaction
+
+    try {
+
+      // Validate the request data
+      $validated = $request->validated();
+      // Create the user
+      $user = User::create([
+        'email' => $validated["email"],
+        'password' => Hash::make($validated["password"]),
+        'user_type' => 'talent',
+      ]);
+
+      // Create the user profile if user creation is successful
+      if ($user) {
+        $user->userprofile()->create([
+          'user_id' => $user->id,
+          'first_name' => $validated["first_name"],
+          'last_name' => $validated["last_name"],
+          'city' => $validated["city"],
+          'state' => $validated["state"],
+          "phone_number" => $validated["phone_number"],
+        ]);
+
+
+        Talent_profile::create([
+          'user_id' => $user->id,
+          'user_profile_id' => $user->userprofile->id,
+        ]);
+
+        // Create an API token for the user
+        $token = $user->createToken('API Token')->plainTextToken;
+
+        // Refresh the user to ensure we retrieve the latest values
+        $user->refresh();
+        $user->load("userprofile");
+        DB::commit(); // Commit transaction
+
+        // Return the user data and token
+        return response()->json([
+          "status" => "success",
+          "message" => "User registered successfully",
+          "data" => new UserResource($user),
+          "token" => $token
+        ], 201);
+      }
+    } catch (Exception $e) {
+      DB::rollBack(); // Rollback transaction on error
+      Log::channel('api')->error($e->getMessage());
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'error' => [
+          'code' => 'SERVER_ERROR',
+          'message' => 'User registration failed',
+        ]
+      ], 500);
+    }
+  }
   //  Talent Profiles search and filter
   public function index(Request $request)
   {
@@ -99,6 +164,7 @@ class TalentProfileController extends Controller
       ]);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback in case of failure
+      Log::channel('api')->error($e->getMessage());
       return response()->json(
         [
           'status' => 'error',
@@ -156,8 +222,9 @@ class TalentProfileController extends Controller
 
 
 
-  public function update(StoreTalent_profileRequest $request, User_profile $user_profile)
+  public function update(StoreTalent_profileRequest $request, Talent_profile $talent_profile)
   {
+    $user_profile = $talent_profile->userprofile;
     Gate::authorize("update", $user_profile);
 
     DB::beginTransaction(); // Begin DB transaction
@@ -165,23 +232,26 @@ class TalentProfileController extends Controller
     try {
       $validated = $request->validated();
 
-      $talent_profile = $user_profile->talentprofile;
 
       // update user profile
       $user_profile->update([
         'first_name' => $validated["first_name"],
-        'last_name' => $validated["last_name"]
+        'last_name' => $validated["last_name"],
+        'linkedin_url' => $validated["linkedin_url"],
+        'github_url' => $validated["github_url"],
+        'twitter_url' => $validated["twitter_url"],
+        'portfolio_url' => $validated["portfolio_url"],
+        'instagram_url' => $validated["twitter_url"],
       ]);
 
-      if ($talent_profile) {
-        // Update existing talent profile
-        $talent_profile->update($validated);
-      }
-
-
-      // create talent profile
-      $user_profile->talentprofile()->create($validated);
-
+      // Update existing talent profile
+      $talent_profile->update([
+        'job_title' => $validated["job_title"],
+        'professional_bio' => $validated["professional_bio"],
+        'tech_skills' => $validated["tech_skills"],
+        'soft_skills' => $validated["soft_skills"],
+        'experience_level' => $validated["experience_level"],
+      ]);
 
       DB::commit(); // Commit transaction on success
 

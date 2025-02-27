@@ -96,19 +96,19 @@ class CompanyProfileController extends Controller
 
       return response()->json([
         "status" => "success",
-        "message" => "Company profile created successfully",
+        "message" => "Company profile updated successfully",
         "data" => new CompanyProfileResource($company_profile),
         "token" => $token
       ], 201); // 201 Created
     } catch (Exception $e) {
       DB::rollBack(); // Rollback on error
       // Log the error for debugging
-      Log::channel("api")->error('Error creating company profile', ['error' => $e->getMessage()]);
+      Log::channel("api")->error('Error updating company profile', ['error' => $e->getMessage()]);
 
       return response()->json([
         'status' => 'error',
         'code' => 500,
-        'message' => 'Failed to create company profile',
+        'message' => 'Failed to update company profile',
       ], 500);
     }
   }
