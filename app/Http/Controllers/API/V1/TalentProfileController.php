@@ -232,7 +232,9 @@ class TalentProfileController extends Controller
     try {
       $validated = $request->validated();
 
-
+      $user_profile->user()->update([
+        'email' => $validated["email"],
+      ]);
       // update user profile
       $user_profile->update([
         'first_name' => $validated["first_name"],
