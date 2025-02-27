@@ -231,7 +231,14 @@ class TalentProfileController extends Controller
 
     try {
       $validated = $request->validated();
-
+      
+      if (User::where('email', $validated['email'])->where('id', '!=', $user_profile->user->id)->exists()) {
+        return response()->json([
+          'status' => 'error',
+          'code' => 409,
+          'message' => 'Email is already in use by another user',
+        ], 409);
+      }
       $user_profile->user()->update([
         'email' => $validated["email"],
       ]);
