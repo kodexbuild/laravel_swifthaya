@@ -25,13 +25,12 @@ class RegisterUserRequest extends FormRequest
     return [
       'first_name' => ['required', 'string', 'max:255'],
       'last_name' => ['required', 'string', 'max:255'],
-      'email' => ['required', 'email', 'unique:users'],
-      'password' => [
+      'email' => $this->getMethod() == "POST" ? ['required', 'email', 'unique:users'] : ['required', 'email'],
+      'password' => $this->getMethod() == "POST" ? [
         'required',
         'confirmed',
         Rules\Password::defaults()
-      ],
-      'street_address' => ['nullable', 'string', 'max:255'],
+      ] : "",
       'city' => ['nullable', 'string', 'max:255'],
       'state' => ['nullable', 'string', 'max:255'],
       'phone_number' => ['required', 'string', 'regex:/^(070|080|081|090|091)[0-9]{7,8}$/'], // Must be a Nigerian phone number      

@@ -12,16 +12,14 @@ class Company_profile extends Model
   protected $fillable = [
     'user_profile_id',
     'company_name',
-    'company_logo',
-    'company_slogan',
+    'company_email',
+    'company_phone_number',
     'company_website',
     'industry',
+    'city',
+    'state',
     'company_size',
     'founded_year',
-    'linkedin_url',
-    'github_url',
-    'twitter_url',
-    'instagram_url',
   ];
 
 

@@ -2,6 +2,8 @@
 
 
 use App\Http\Controllers\API\V1\AuthController;
+use App\Http\Controllers\API\V1\CompanyProfileController;
+use App\Http\Controllers\API\V1\IndividualController;
 use App\Http\Controllers\API\V1\MessageController;
 use App\Http\Controllers\API\V1\ReviewController;
 use App\Http\Controllers\API\V1\TalentProfileController;
@@ -14,10 +16,20 @@ use Illuminate\Support\Facades\Route;
 // Authentication and Registeration routes
 Route::middleware(['guest'])->group(function () {
   Route::post('/login', [AuthController::class, "login"]);
-  Route::post('/register_talent', [TalentProfileController::class, "register_talent"]);
-  Route::post('/register_company', [AuthController::class, "register_company"]);
-  Route::post('/register_individual', [AuthController::class, "register_individual"]);
+  Route::post('/register_talent', [TalentProfileController::class, "register"]);
+  Route::post('/register_company', [CompanyProfileController::class, "register"]);
+  Route::post('/register_individual', [IndividualController::class, "register"]); 
 });
+// individual
+Route::middleware(['auth:sanctum'])->prefix("/individuals")->group(function () {
+  Route::get("/{user}", [IndividualController::class, "show"]);
+
+  Route::patch("/{user}", [IndividualController::class, "update"]);
+
+  // Company logo upload
+  Route::post('/{user}/profile_pic', [IndividualController::class, 'uploadPhoto']);
+});
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
 

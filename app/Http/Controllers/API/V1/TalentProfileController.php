@@ -27,7 +27,7 @@ use Throwable;
 class TalentProfileController extends Controller
 {
 
-  public function register_talent(RegisterUserRequest $request)
+  public function register(RegisterUserRequest $request)
   {
     DB::beginTransaction(); // Start transaction
 
@@ -290,7 +290,7 @@ class TalentProfileController extends Controller
       // deleting previous image to store new one 
       Storage::disk("public")->delete($talent_profile->userprofile->profile_picture ?? "");
 
-      $talent_profile->profile_picture = $validated;
+      $talent_profile->userprofile->profile_picture = $validated;
       $talent_profile->userprofile()->update(["profile_picture" => $validated]);
       $talent_profile->refresh();
     }

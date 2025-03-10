@@ -15,10 +15,14 @@ return new class extends Migration
       $table->id();
       $table->foreignId('user_profile_id')->constrained()->cascadeOnDelete();
       $table->string('company_name');
+      $table->string('company_email');
+      $table->string('company_phone_number');
       $table->string('industry');
       $table->string('company_size')->nullable();
       $table->string('company_website');
       $table->year('founded_year')->nullable();
+      $table->string('city')->nullable();
+      $table->string('state')->nullable();
       $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
       $table->timestamps();
     });
