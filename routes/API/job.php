@@ -8,11 +8,7 @@ use Illuminate\Support\Facades\Route;
 // job search
 Route::get("/jobs/search", [SwifthayajobController::class, "job_search"])->middleware(['auth:sanctum', "can:talent"]);
 
-<<<<<<< HEAD
-Route::middleware(['auth:sanctum', 'can:company'])->prefix("/jobs")->group(function () {
-=======
 Route::middleware(['auth:sanctum', 'can:employer'])->prefix("/jobs")->group(function () {
->>>>>>> d8307de (Recovering lost project)
 
   // List all jobs
   Route::get('', [SwifthayajobController::class, 'index']);

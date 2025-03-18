@@ -121,6 +121,10 @@ class IndividualController extends Controller
         'city' => $validated["city"],
         'state' => $validated["state"],
         "phone_number" => $validated["phone_number"],
+        "linkedin_url" => $validated["linkedin_url"],
+        "github_url" => $validated["github_url"],
+        "twitter_url" => $validated["twitter_url"],
+        "instagram_url" => $validated["instagram_url"],
       ]);
 
       // Refresh the user to ensure we retrieve the latest values

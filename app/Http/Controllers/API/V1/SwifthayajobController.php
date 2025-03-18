@@ -131,30 +131,18 @@ class SwifthayajobController extends Controller
   public function job_search(Request $request)
   {
     try {
-      $query = Swifthayajob::with("user")->where('status', "approved"); // Filter only approved jobs
+      // $query = Swifthayajob::with("user")->where('status', "approved"); // Filter only approved jobs
+      $query = Swifthayajob::with("user");
 
-      if (!empty($request->keyword)) {
-        $query->where(function ($q) use ($request) {
-          $q->orWhere('title', 'like', '%' . $request->keyword . '%')
-            ->orWhere('required_skills', 'like', '%' . $request->keyword . '%')
-            ->orWhere('location', 'like', '%' . $request->keyword . '%')
-            ->orWhere('job_type', 'like', '%' . $request->keyword . '%');
-        });
-      }
 
       // Filtering by title
-      if ($request->filled('title')) {
-        $query->where('title', 'like', '%' . $request->title . '%');
+      if ($request->filled('experience_level')) {
+        $query->where('experience_level', 'like', '%' . $request->experience_level . '%');
       }
 
-      // Filtering by required_skills
-      if ($request->filled('required_skills')) {
-        $query->where('required_skills', 'like', '%' . $request->required_skills . '%');
-      }
-
-      // Filtering by salary_range
-      if ($request->filled('salary_range')) {
-        $query->where('salary_range', 'like', '%' . $request->salary_range . '%');
+      // Filtering by salary_period
+      if ($request->filled('salary_period')) {
+        $query->where('salary_period', $request->salary_period);
       }
 
       // Filtering by location

@@ -26,7 +26,7 @@ return new class extends Migration
       $table->text('qualifications')->nullable();
       $table->enum('experience_level', ['entry', 'junior', 'intermediate', 'senior', 'lead']);
       $table->enum('job_type', ['full_time', 'part_time', 'contract', 'internship']);
-      // $table->timestamp('posted_at')->useCurrent();
+      $table->timestamp('posted_at')->useCurrent();
       // $table->timestamp('deadline_date')->nullable();
       $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
       $table->timestamps();

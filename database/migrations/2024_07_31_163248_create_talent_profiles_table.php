@@ -18,8 +18,7 @@ return new class extends Migration
       $table->text('professional_bio')->nullable();
       $table->json('tech_skills')->nullable();
       $table->json('soft_skills')->nullable();
-      $table->enum('experience_level', ['entry', 'mid_senior', 'senior', 'executive'])->nullable();
-      $table->string('portfolio_url')->nullable();
+      $table->enum('experience_level', ['entry', 'junior', 'intermediate', 'senior', 'lead'])->nullable();
       $table->string('resume')->nullable();
       $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
       $table->timestamps();
