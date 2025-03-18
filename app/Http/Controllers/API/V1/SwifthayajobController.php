@@ -18,39 +18,40 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class SwifthayajobController extends Controller
 {
   // Retrieve jobs by company ID
   public function index()
   {
-    try {
-      $user = Auth::user(); // Fetch the authenticated user
-      $jobs = Swifthayajob::where("company_id", $user->id)->latest()->paginate(10); // Filter jobs by company ID
+    $user = Auth::user(); // Fetch the authenticated user
+    $jobs = Swifthayajob::where("company_id", $user->id)->latest()->paginate(10); // Filter jobs by company ID
 
-      // if ($jobs->isEmpty()) { 
-      //   return response()->json(["message" => "Company has no jobs"]);
-      // }
+    // if ($jobs->isEmpty()) { 
+    //   return response()->json(["message" => "Company has no jobs"]);
+    // }
 
-      foreach ($jobs as $job) {
-        Gate::authorize("view", $job); // Check if the user is authorized to view the job
-      }
-
-      return SwifthayajobResource::collection($jobs); // Return a collection of jobs
-    } catch (Exception $e) {
-      return response()->json(['message' => 'Failed to retrieve jobs', 'error' => $e->getMessage()], 500);
+    foreach ($jobs as $job) {
+      Gate::authorize("view", $job); // Check if the user is authorized to view the job
     }
+
+    return response()->json([
+      "status" => "success",
+      "message" => "Jobs retrieved successfully",
+      "data" => SwifthayajobResource::collection($jobs),
+    ]);
   }
 
   // Show specific job
   public function show(Swifthayajob $job)
   {
-    try {
-      Gate::authorize("view", $job); // Check if the user is authorized to view the job
-      return new SwifthayajobResource($job);
-    } catch (Exception $e) {
-      return response()->json(['message' => 'Failed to retrieve job', 'error' => $e->getMessage()], 500);
-    }
+    Gate::authorize("view", $job); // Check if the user is authorized to view the job
+    return response()->json([
+      "status" => "success",
+      "message" => "Job retrieved successfully",
+      "data" => new SwifthayajobResource($job),
+    ]);
   }
 
   // Create a new job
@@ -75,46 +76,48 @@ class SwifthayajobController extends Controller
       $job->refresh(); // Reload the model to get default values 
 
       DB::commit(); // Commit transaction
-      return response()->json(["message" => "Job created successfully", "data" => new SwifthayajobResource($job)], 201);
+      return response()->json([
+        "status" => "success",
+        "message" => "Job created successfully",
+        "data" => new SwifthayajobResource($job)
+      ], 201);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback in case of failure
-      return response()->json(['message' => 'Failed to create job', 'error' => $e->getMessage()], 500);
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'message' => 'Failed to create job',
+      ], 500);
     }
   }
 
   // Update job
-  public function update(UpdateSwifthayajobRequest $request, Swifthayajob $job)
+
+  public function update(StoreSwifthayajobRequest $request, Swifthayajob $job)
   {
-    DB::beginTransaction(); // Begin DB transaction
-    try {
-      Gate::authorize("update", $job); // Ensure user is authorized to update the job
-      $validated = $request->validated(); // Validate request data
+    Gate::authorize("update", $job); // Ensure user is authorized to update the job
+    $validated = $request->validated(); // Validate request data
 
-      $validated["required_skills"] = json_encode($validated["required_skills"]); // Store skills as JSON
 
-      $job->update($validated); // Update job with new data
+    $job->update($validated); // Update job with new data
 
-      DB::commit(); // Commit transaction
-      return response()->json(["message" => "Job updated successfully", "data" => new SwifthayajobResource($job)], 200);
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback in case of failure
-      return response()->json(['message' => 'Failed to update job', 'error' => $e->getMessage()], 500);
-    }
+    DB::commit(); // Commit transaction
+    return response()->json([
+      "status" => "success",
+      "message" => "Job updated successfully",
+      "data" => new SwifthayajobResource($job)
+    ], 201);
   }
 
   // Delete job
   public function destroy(Swifthayajob $job)
   {
     DB::beginTransaction(); // Begin DB transaction
-    try {
-      Gate::authorize("delete", $job); // Ensure user is authorized to delete the job
-      $job->delete(); // Delete the job
-      DB::commit(); // Commit transaction
-      return response()->json(["message" => "Job deleted successfully"], 200);
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback in case of failure
-      return response()->json(['message' => 'Failed to delete job', 'error' => $e->getMessage()], 500);
-    }
+
+    Gate::authorize("delete", $job); // Ensure user is authorized to delete the job
+    $job->delete(); // Delete the job
+    DB::commit(); // Commit transaction
+    return response()->json(["message" => "Job deleted successfully"], 200);
   }
 
   // Offer job functionality (implementation missing)

@@ -12,12 +12,16 @@ class Swifthayajob extends Model
   protected $fillable = [
     'company_id',
     'title',
-    'description',
-    'required_skills',
+
     'location',
-    'salary_min',
-    'salary_max',
     'job_type',
+    'salary_amount',
+    'salary_period',
+    'job_summary',
+    'responsibilities',
+    'requirements',
+    'qualifications',
+    'experience_level',
     'deadline_date',
   ];
 

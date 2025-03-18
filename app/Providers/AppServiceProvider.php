@@ -34,7 +34,8 @@ class AppServiceProvider extends ServiceProvider
     Gate::define("individual", function (User $user) {
       return $user->user_type === "admin" || $user->user_type === "individual" && $user->user_status !== "banned";
     });
-    Gate::define("individual_company", function (User $user) {
+
+    Gate::define("employer", function (User $user) {
       return $user->user_type === "admin" || $user->user_type === "individual" || $user->user_type === "company" && $user->user_status !== "banned";
     });
   }

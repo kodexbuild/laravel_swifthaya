@@ -22,7 +22,6 @@ class UserResource extends JsonResource
       'status' => $this->status,
       // 'last_login_at' => $this->last_login_at,
       'created_at' => $this->created_at->toDateTimeString(),
-      
       'user_profile' => new UserProfileResource($this->userprofile),  // Including user profile
 
     ];

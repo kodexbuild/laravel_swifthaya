@@ -32,11 +32,12 @@ class StoreCompany_profileRequest extends FormRequest
         Rules\Password::defaults()
       ] : "",
       'company_email' => ['required', 'email'],
+      // 'company_email' => $this->getMethod() == "PATCH" ? ['required', 'email'] : ['required', 'email', 'unique:users'],
       'city' => ['required', 'string', 'max:255'],
       'state' => ['required', 'string', 'max:255'],
       'bio' => ['nullable', 'string', 'max:255'],
       'phone_number' => ['required', 'string', 'regex:/^(070|080|081|090|091)[0-9]{7,8}$/'], // Must be a Nigerian phone number
-            
+
       // comp details
       'company_phone_number' => ['required', 'string', 'regex:/^(070|080|081|090|091)[0-9]{7,8}$/'], // Must be a Nigerian phone number      
       'company_name' => ['required', 'string', 'max:255'],

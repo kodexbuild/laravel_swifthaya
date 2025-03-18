@@ -8,6 +8,7 @@ use App\Http\Requests\RegisterUserRequest;
 use App\Http\Requests\StoreCompany_profileRequest;
 use App\Http\Requests\StoreTalent_profileRequest;
 use App\Http\Resources\CompanyProfileResource;
+use App\Http\Resources\TalentProfileResource;
 use App\Http\Resources\UserResource;
 use App\Models\Talent_profile;
 use Illuminate\Http\Request;
@@ -25,8 +26,6 @@ class AuthController extends Controller
   /**
    * Register a new user.
    */
- 
-
 
   /**
    * Log the user in.
@@ -55,12 +54,30 @@ class AuthController extends Controller
 
       DB::commit(); // Commit transaction
 
-      return response()->json([
+      $res_arr = [
         'status' => 'success',
         'message' => 'Login successful',
         "data" => new UserResource($user),
         'token' => $token,
-      ], 200);
+      ];
+
+      if ($user->user_type == "company") {
+        $res_arr = [
+          'status' => 'success',
+          'message' => 'Login successful',
+          "data" => new CompanyProfileResource($user->userprofile->companyprofile),
+          'token' => $token,
+        ];
+      }
+      if ($user->user_type == "talent") {
+        $res_arr = [
+          'status' => 'success',
+          'message' => 'Login successful',
+          "data" => new TalentProfileResource($user->userprofile->talentprofile),
+          'token' => $token,
+        ];
+      }
+      return response()->json($res_arr, 200);
     } catch (ValidationException $e) {
       DB::rollBack(); // Rollback transaction on validation error
 
@@ -70,6 +87,7 @@ class AuthController extends Controller
         'suggestion' => 'Please input the correct email and password',
       ], 401);
     } catch (Exception $e) {
+      Log::channel('api')->error("debuggu", ["error" => $e->getMessage()]);
       DB::rollBack(); // Rollback on any other errors
       return response()->json([
         'status' => 'error',
