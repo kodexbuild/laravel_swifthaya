@@ -12,7 +12,6 @@ class Swifthayajob extends Model
   protected $fillable = [
     'company_id',
     'title',
-
     'location',
     'job_type',
     'salary_amount',
@@ -22,6 +21,8 @@ class Swifthayajob extends Model
     'requirements',
     'qualifications',
     'experience_level',
+    'posted_at',
+    'job_status',
     'deadline_date',
   ];
 
@@ -107,5 +108,16 @@ class Swifthayajob extends Model
   public function application()
   {
     return $this->hasMany(Application::class, "swifthayajob_id");
+  }
+  public function company()
+  {
+    return $this->hasOneThrough(
+      Company_profile::class,
+      User_profile::class,
+      'user_id', // Foreign key on UserProfile table
+      'user_profile_id', // Foreign key on CompanyProfile table
+      'company_id', // Local key on Job table
+      'id' // Local key on UserProfile table
+    );
   }
 }

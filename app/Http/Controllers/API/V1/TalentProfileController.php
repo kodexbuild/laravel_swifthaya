@@ -92,58 +92,30 @@ class TalentProfileController extends Controller
   public function index(Request $request)
   {
     try {
-      $query = Talent_profile::with("userprofile")->where('status', "approved");
+      // $query = Talent_profile::with("userprofile")->where('status', "approved");
+      $query = Talent_profile::with("userprofile");
 
-      if (!empty($request->keyword)) {
+      if ($request->filled('keyword')) {
         $query->where(function ($q) use ($request) {
-          $q->orWhere('skills', 'like', '%' . $request->keyword . '%');
-          $q->orWhere('skills', 'like', '%' . $request->keyword . '%');
-          $q->orWhere('education', 'like', '%' . $request->keyword . '%');
-          $q->orWhere('experience', 'like', '%' . $request->keyword . '%');
+          $q->orWhere('tech_skills', 'like', '%' . $request->keyword . '%');
+          $q->orWhere('soft_skills', 'like', '%' . $request->keyword . '%');
+          $q->orWhere('job_title', 'like', '%' . $request->keyword . '%');
         });
       }
 
 
-      // Filtering by skills
-      if ($request->filled('skills')) {
-        $skills = $request->input('skills');
-        $query->where(function ($q) use ($skills) {
-          $q->where('skills', 'like', '%' . $skills . '%');
-        });
-      }
 
-
-      // Filtering by location (location is in user_profile table)
+      // Filtering by job type
       if ($request->filled('location')) {
-        $location = $request->input('location');
-        $query->whereHas('userprofile', function ($q) use ($location) {
-          $q->where('location', 'like', '%' . $location . '%');
+        $query->orWhereHas('userProfile', function ($companyQuery) use ($request) {
+          $companyQuery->where('state', 'like', '%' . $request->location . '%');
         });
       }
 
-      // Filtering by experience level
-      if ($request->filled('experience')) {
 
-        $experience = strval(request()->input('experience'));
-
-        // $query->whereRaw("JSON_CONTAINS(experience, '\"" . $experience . "\"', '$[*].duration')");
-
-        $query->whereJsonContains('experience', ['duration' => (string)$experience]);
+      if ($request->filled('experience_level')) {
+        $query->where('experience_level', 'like', '%' . $request->experience_level . '%');
       }
-
-      // test
-      // // Filtering by experience level
-      // if ($request->filled('experience')) {
-      //   $experience = intval($request->input('experience'));
-
-      //   // Option 1: Using whereJsonContains for exact match
-      //   $query->whereRaw("JSON_CONTAINS(experience, '\"" . $experience . "\"', '$[*].duration')");
-
-      //   // Option 2: Using whereJsonContains with array structure
-      //   $query->whereJsonContains('experience', ['duration' => (string)$experience]);
-      // }
-
-      // test
 
       $talents = $query->latest()->paginate(10);
 

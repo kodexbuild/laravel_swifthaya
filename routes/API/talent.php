@@ -5,9 +5,10 @@ use Illuminate\Support\Facades\Route;
 
 
 // View all talent profiles with filters 
-Route::get("/talents/search", [TalentProfileController::class, "index"])->middleware(["auth:sanctum", "can:individual_company"]);
+Route::get("/talents/search", [TalentProfileController::class, "index"])->middleware(["auth:sanctum", "can:employer"]);
 
 Route::middleware(['auth:sanctum', "can:talent"])->prefix("/talents")->group(function () {
+
   // View a talent profile 
   Route::get("/{talent_profile}", [TalentProfileController::class, "show"]);
 

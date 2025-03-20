@@ -26,7 +26,7 @@ class StoreCompany_profileRequest extends FormRequest
       'first_name' => 'required|string|max:255',
       'last_name' => 'required|string|max:255',
       'email' => $this->getMethod() == "PATCH" ? ['required', 'email'] : ['required', 'email', 'unique:users'],
-      'password' => $this->getMethod() == "PATCH" ? [
+      'password' => $this->getMethod() == "POST" ? [
         'required',
         'confirmed',
         Rules\Password::defaults()

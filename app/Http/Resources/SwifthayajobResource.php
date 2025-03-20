@@ -29,6 +29,8 @@ class SwifthayajobResource extends JsonResource
       'qualifications' => $this->qualifications,
       'experience_level' => $this->experience_level,
       'job_type' => $this->job_type,
+      'job_status' => $this->job_status,
+      'posted_at' => $this->posted_at,
       'status' => $this->status,
     ];
   }

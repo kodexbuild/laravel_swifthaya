@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 
 // job search
+
 Route::get("/jobs/search", [SwifthayajobController::class, "job_search"])->middleware(['auth:sanctum', "can:talent"]);
 
 Route::middleware(['auth:sanctum', 'can:employer'])->prefix("/jobs")->group(function () {
@@ -24,6 +25,10 @@ Route::middleware(['auth:sanctum', 'can:employer'])->prefix("/jobs")->group(func
 
   // Delete a job
   Route::delete('/{job}', [SwifthayajobController::class, 'destroy']);
+
+  Route::post('/{job}/publish', [SwifthayajobController::class, 'publish']);
+
+  // Publish a job ie the actual posting
 });
 
 
