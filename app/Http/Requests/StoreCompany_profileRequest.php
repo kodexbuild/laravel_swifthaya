@@ -48,6 +48,11 @@ class StoreCompany_profileRequest extends FormRequest
       'company_state' => ['required', 'string', 'max:255'],
       'industry' => ['required', 'string', 'max:255'],
       'founded_year' => 'nullable|integer|digits:4|min:1800|max:' . date('Y'),
+      'linkedin_url' => 'nullable|string',
+      'github_url' => 'nullable|string',
+      'twitter_url' => 'nullable|string',
+      'instagram_url' => 'nullable|string',
+      'portfolio_url' => 'nullable|string',
     ];
   }
 }

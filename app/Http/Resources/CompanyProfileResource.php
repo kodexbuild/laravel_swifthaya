@@ -26,6 +26,10 @@ class CompanyProfileResource extends JsonResource
       'company_city' => $this->city,
       'company_state' => $this->state,
       'industry' =>  $this->industry,
+      'linkedin' => $this->userprofile->linkedin_url,
+      'twitter' => $this->userprofile->twitter_url,
+      'instagram' => $this->userprofile->instagram_url,
+      'github' => $this->userprofile->github_url,
       'founded_year' =>  $this->founded_year,
       'status' => $this->status,
       'user' => new UserResource($this->userprofile->user),  // Including user 

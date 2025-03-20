@@ -25,11 +25,7 @@ class UpdateCompany_profileRequest extends FormRequest
   {
     return [
       'email' => ['required', 'email', 'unique:users'],
-      'password' => [
-        'required',
-        'confirmed',
-        Rules\Password::defaults()
-      ],
+
       'street_address' => ['nullable', 'string', 'max:255'],
       'city' => ['nullable', 'string', 'max:255'],
       'state' => ['nullable', 'string', 'max:255'],
