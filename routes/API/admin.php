@@ -22,15 +22,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'can:admin'])->group(functio
     // Get the number of users
     Route::get('/count', [UserController::class, 'count']);
 
-    // Create a new user
-    Route::post('/', [UserController::class, 'store']);
-
     // show a single user
     Route::post('/{user}', [UserController::class, 'show']);
-
-    // Update user information 
-    Route::patch('/{user}', [UserController::class, 'update']);
-
 
     // Approve user registration 
     Route::patch('/{user}/approve', [UserController::class, 'approve']);
@@ -98,49 +91,43 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'can:admin'])->group(functio
     Route::patch('/{job}/reject', [SwifthayajobController::class, 'reject']);
   });
 
-  // Project Management Routes
-  Route::prefix('projects')->group(function () {
-    // List all projects
-    Route::get('/', [ProjectController::class, 'index']);
+  // // Project Management Routes
+  // Route::prefix('projects')->group(function () {
+  //   // List all projects
+  //   Route::get('/', [ProjectController::class, 'index']);
 
-    // Get the total number of projects
+  //   // Get the total number of projects
 
-    Route::get('/count', [ProjectController::class, 'count']);
+  //   Route::get('/count', [ProjectController::class, 'count']);
 
-    // Create a new project
-    Route::post('/', [ProjectController::class, 'store']);
+  //   // Create a new project
+  //   Route::post('/', [ProjectController::class, 'store']);
 
-    // View a specific project
-    Route::get('/{project}', [ProjectController::class, 'show']);
+  //   // View a specific project
+  //   Route::get('/{project}', [ProjectController::class, 'show']);
 
-    // Update project information 
-    Route::patch('/{project}', [ProjectController::class, 'update']);
+  //   // Update project information 
+  //   Route::patch('/{project}', [ProjectController::class, 'update']);
 
-    // Delete a project
-    Route::delete('/{project}', [ProjectController::class, 'destroy']);
+  //   // Delete a project
+  //   Route::delete('/{project}', [ProjectController::class, 'destroy']);
 
-    // Approve a project 
-    Route::patch('/{project}/approve', [ProjectController::class, 'approve']);
+  //   // Approve a project 
+  //   Route::patch('/{project}/approve', [ProjectController::class, 'approve']);
 
-    // Reject a project 
-    Route::patch('/{project}/reject', [ProjectController::class, 'reject']);
-  });
+  //   // Reject a project 
+  //   Route::patch('/{project}/reject', [ProjectController::class, 'reject']);
+  // });
 
   // Talent Profile Management Routes
-  Route::prefix('talent_profiles')->group(function () {
+  Route::prefix('talents')->group(function () {
     // List all talent profiles
     Route::get('/', [TalentProfileController::class, 'index']);
 
     Route::get('/count', [TalentProfileController::class, 'count']);
 
-    // Create a talent profile
-    Route::post('/{user}', [TalentProfileController::class, 'store']);
-
     // View a specific talent profile
     Route::get('/{talent_profile}', [TalentProfileController::class, 'show']);
-
-    // Update talent profile information 
-    Route::patch('/{talent_profile}', [TalentProfileController::class, 'update']);
 
     // Delete a talent profile
     // Route::delete('/{talent}', [TalentProfileController::class, 'delete']);
@@ -153,31 +140,26 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'can:admin'])->group(functio
   });
 
   // Company Profile Management Routes
-  Route::prefix('company_profiles')->group(function () {
+  Route::prefix('companies')->group(function () {
     // List all company profiles
     Route::get('/', [CompanyProfileController::class, 'index']);
 
     // Get the total number of company profiles
-
     Route::get('/count', [CompanyProfileController::class, 'count']);
 
-    // Create a company profile
-    Route::post('/', [CompanyProfileController::class, 'store']);
 
     // View a specific company profile
-    Route::get('/{company}', [CompanyProfileController::class, 'show']);
+    Route::get('/{company_profile}', [CompanyProfileController::class, 'show']);
 
-    // Update company profile information 
-    Route::patch('/', [CompanyProfileController::class, 'update']);
 
     // Delete a company profile
-    // Route::delete('/{company}', [CompanyProfileController::class, 'delete']);
+    // Route::delete('/{company_profile}', [CompanyProfileController::class, 'delete']);
 
     // Approve a company profile 
-    Route::patch('/{company}/approve', [CompanyProfileController::class, 'approve']);
+    Route::patch('/{company_profile}/approve', [CompanyProfileController::class, 'approve']);
 
     // Reject a company profile 
-    Route::patch('/{company}/reject', [CompanyProfileController::class, 'reject']);
+    Route::patch('/{company_profile}/reject', [CompanyProfileController::class, 'reject']);
   });
 
   // Application Management Routes
@@ -185,15 +167,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'can:admin'])->group(functio
     // Get the total number of job applications
     Route::get('/jobs/count', [ApplicationController::class, 'job_count']);
 
-    // Get the total number of project applications
-    Route::get('/projects/count', [ApplicationController::class, 'project_count']);
-
     // List job applications made by talents
-    Route::get('/jobs', [ApplicationController::class, 'jobApplications']);
-
-    // List project applications made by talents
-    Route::get('/projects', [ApplicationController::class, 'projectApplications']);
-
+    Route::get('/jobs', [ApplicationController::class, 'index']);
 
     // Delete an application
     Route::delete('/{application}', [ApplicationController::class, 'destroy']);

@@ -27,7 +27,7 @@ class SwifthayajobController extends Controller
   public function index()
   {
     $user = Auth::user(); // Fetch the authenticated user
-    $jobs = Swifthayajob::where("company_id", $user->id)->latest()->paginate(10); // Filter jobs by company ID
+    $jobs = Swifthayajob::where("employer_id", $user->id)->latest()->paginate(10); // Filter jobs by company ID
 
     // if ($jobs->isEmpty()) { 
     //   return response()->json(["message" => "Company has no jobs"]);
@@ -63,14 +63,10 @@ class SwifthayajobController extends Controller
       $user = Auth::user();
       $company = Company_profile::where("user_profile_id", $user->userprofile->id)->exists();
 
-      if (!$company) {
-        return response()->json(["status" => "error", "message" => "Can't create a job without company profile"], 400);
-      }
-
       $validated = $request->validated(); // Validate the request data
 
 
-      $validated["company_id"] = $user->id; // Associate the job with the authenticated user
+      $validated["employer_id"] = $user->id; // Associate the job with the authenticated user
 
       $job = $user->swifthayajob()->create($validated); // Create job
 

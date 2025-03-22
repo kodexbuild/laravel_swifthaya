@@ -45,7 +45,7 @@ class SwifthayajobController extends Controller
 
     $skillsArray = explode(',', request()->required_skills);
     $validated = $request->validated();
-    $validated["company_id"] = $user->id;
+    $validated["employer_id"] = $user->id;
     $validated["required_skills"] = json_encode($skillsArray);
 
     Swifthayajob::create($validated);

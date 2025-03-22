@@ -16,41 +16,27 @@ use Illuminate\Support\Facades\DB;
 class ApplicationController extends Controller
 {
   // List all applications
-  // public function index()
-  // {
-  //   try {
-  //     // Fetch and paginate applications
-  //     $applications = Application::latest()->paginate(10);
-
-  //     return ApplicationResource::collection($applications);
-  //   } catch (Exception $e) {
-  //     return response()->json(['message' => $e->getMessage()], 400);  // No DB transaction here, so no rollback needed
-  //   }
-  // }
-
-  // Get the total no project applications
-  public function project_count()
+  public function index()
   {
     try {
-      // Fetch and paginate project applications
-      $application_count = Application::whereNotNull("project_id")->count();
+      // Fetch and paginate applications
+      $applications = Application::with("user")->latest()->paginate(10);
 
-      return response()->json([
-        "message" => "Project application count retrieved successfully.",
-        "data" => [
-          "count" => $application_count
-        ]
-      ]);
+      return ApplicationResource::collection($applications)
+        ->response()
+        ->setStatusCode(200);
     } catch (Exception $e) {
-      return response()->json(['message' => 'Failed to retrieve project application count', 'error' => $e->getMessage()], 500);
+      return response()->json(['message' => $e->getMessage()], 400);  // No DB transaction here, so no rollback needed
     }
   }
+
+
   // Get the total no job applications
-  public function job_count()
+  public function count()
   {
     try {
       // Fetch and paginate job applications
-      $application_count = Application::whereNotNull("swifthayajob_id")->count();
+      $application_count = Application::count();
 
       return response()->json([
         "message" => "Job application count retrieved successfully.",
@@ -62,31 +48,7 @@ class ApplicationController extends Controller
       return response()->json(['message' => 'Failed to retrieve job application count', 'error' => $e->getMessage()], 500);
     }
   }
-  // Get all job applications
-  public function jobApplications()
-  {
-    try {
-      // Fetch and paginate job applications
-      $applications = Application::with(["user", "swifthayajob"])->whereNotNull("swifthayajob_id")->latest()->paginate(10);
 
-      return ApplicationResource::collection($applications);
-    } catch (Exception $e) {
-      return response()->json(['message' => 'Failed to retrieve job applications', 'error' => $e->getMessage()], 500);
-    }
-  }
-
-  // Get all project applications
-  public function projectApplications()
-  {
-    try {
-      // Fetch and paginate project applications
-      $applications = Application::with(["user", "project"])->whereNotNull("project_id")->latest()->paginate(10);
-
-      return ApplicationResource::collection($applications);
-    } catch (Exception $e) {
-      return response()->json(['message' => 'Failed to retrieve project applications', 'error' => $e->getMessage()], 500);
-    }
-  }
 
   // Delete an application
   public function destroy(Application $application)

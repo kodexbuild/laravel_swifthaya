@@ -13,7 +13,7 @@ return new class extends Migration
   {
     Schema::create('swifthayajobs', function (Blueprint $table) {
       $table->id();
-      $table->foreignId('company_id')->constrained('users')->cascadeOnDelete();
+      $table->foreignId('employer_id')->constrained('users')->cascadeOnDelete();
       $table->string('title');
       // $table->string('required_skills')->nullable();
       $table->string('location')->nullable();

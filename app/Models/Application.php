@@ -12,7 +12,7 @@ class Application extends Model
   protected $fillable = [
     'applicant_id',
     'swifthayajob_id',
-    'project_id',
+    // 'project_id',
     'applied_at',
     'status',
   ];

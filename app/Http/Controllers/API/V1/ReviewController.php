@@ -81,16 +81,16 @@ class ReviewController extends Controller
           return response()->json(["error" => "Employer cannot review another employer"], 400);
         }
         // Find if any job posted by the company has an application by the talent
-        $company_Id = Auth::user()->id;
+        $employer_id = Auth::user()->id;
         $talentId = $validated["reviewee_id"];
         // job
-        $hasappliedjob = Swifthayajob::where('company_id', $company_Id)
+        $hasappliedjob = Swifthayajob::where('employer_id', $employer_id)
           ->whereHas('application', function ($query) use ($talentId) {
             $query->where(['applicant_id' => $talentId, "status" => "accepted"]);
           })->exists();
 
         // project
-        $hasappliedproject = Project::where('poster_id', $company_Id)
+        $hasappliedproject = Project::where('poster_id', $employer_id)
           ->whereHas('application', function ($query) use ($talentId) {
             $query->where(['applicant_id' => $talentId, "status" => "accepted"]);
           })->exists();
@@ -103,15 +103,15 @@ class ReviewController extends Controller
           return response()->json(["error" => "Talent cannot review another talent"], 400);
         }
         $talentId = Auth::user()->id;
-        $company_Id = $validated["reviewee_id"];
+        $employer_id = $validated["reviewee_id"];
         // job
-        $hasappliedjob = Swifthayajob::where('company_id', $company_Id)
+        $hasappliedjob = Swifthayajob::where('employer_id', $employer_id)
           ->whereHas('applications', function ($query) use ($talentId) {
             $query->where(['applicant_id' => $talentId, "status" => "accepted"]); // Or 'user_id' for talents
           })->exists();
 
         // projects
-        $hasappliedproject = Project::where('poster_id', $company_Id)
+        $hasappliedproject = Project::where('poster_id', $employer_id)
           ->whereHas('applications', function ($query) use ($talentId) {
             $query->where(['applicant_id' => $talentId, "status" => "accepted"]); // Or 'user_id' for talents
           })->exists();

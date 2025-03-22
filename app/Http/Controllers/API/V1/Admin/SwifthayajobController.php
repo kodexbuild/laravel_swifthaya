@@ -82,9 +82,9 @@ class SwifthayajobController extends Controller
       $validated = $request->validated();
 
 
-      // Assign the authenticated user ID as company_id
+      // Assign the authenticated user ID as employer_id
 
-      $validated["company_id"] = $user->id; // Associate the job with the authenticated user
+      $validated["employer_id"] = $user->id; // Associate the job with the authenticated user
 
       $validated["required_skills"] = json_encode($validated["required_skills"]); // Store skills as JSON
 

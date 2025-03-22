@@ -10,7 +10,7 @@ class Swifthayajob extends Model
 {
   use HasFactory;
   protected $fillable = [
-    'company_id',
+    'employer_id',
     'title',
     'location',
     'job_type',
@@ -99,11 +99,11 @@ class Swifthayajob extends Model
   }
   // public function companyprofile()
   // {
-  //   return $this->belongsTo(Company_profile::class, 'company_id');
+  //   return $this->belongsTo(Company_profile::class, 'employer_id');
   // }
   public function user()
   {
-    return $this->belongsTo(User::class, 'company_id');
+    return $this->belongsTo(User::class, 'employer_id');
   }
   public function application()
   {
@@ -116,7 +116,7 @@ class Swifthayajob extends Model
       User_profile::class,
       'user_id', // Foreign key on UserProfile table
       'user_profile_id', // Foreign key on CompanyProfile table
-      'company_id', // Local key on Job table
+      'employer_id', // Local key on Job table
       'id' // Local key on UserProfile table
     );
   }

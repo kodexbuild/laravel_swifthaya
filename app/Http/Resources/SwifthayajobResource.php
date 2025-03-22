@@ -16,7 +16,7 @@ class SwifthayajobResource extends JsonResource
   {
     return [
       'id' => $this->id,
-      'company_id' => $this->company_id,
+      'employer_id' => $this->employer_id,
       'title' => $this->title,
       'location' => $this->location,
       'salary' => $this->salary_amount ? [

@@ -126,7 +126,7 @@ class MessageController extends Controller
     $employerId = $user->id;
 
     $hasAppliedJob = Application::whereHas('swifthayajob', function ($query) use ($employerId) {
-      $query->where('company_id', $employerId);
+      $query->where('employer_id', $employerId);
     })->where('applicant_id', $recipient->id)->exists();
 
     $hasAppliedProject = Application::whereHas('project', function ($query) use ($employerId) {

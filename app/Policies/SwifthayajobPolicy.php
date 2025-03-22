@@ -10,7 +10,7 @@ class SwifthayajobPolicy
 {
   public function view(User $user, Swifthayajob $job): bool
   {
-    return ($user->user_type === "admin" || $user->id === $job->company_id);
+    return ($user->user_type === "admin" || $user->id === $job->employer_id);
   }
 
 
@@ -19,7 +19,7 @@ class SwifthayajobPolicy
    */
   public function update(User $user, Swifthayajob $job): bool
   {
-    return ($user->user_type === "admin" || $user->id === $job->company_id);
+    return ($user->user_type === "admin" || $user->id === $job->employer_id);
   }
 
   /**
@@ -27,7 +27,7 @@ class SwifthayajobPolicy
    */
   public function delete(User $user, Swifthayajob $job): bool
   {
-    return ($user->user_type === "admin" || $user->id === $job->company_id);
+    return ($user->user_type === "admin" || $user->id === $job->employer_id);
   }
 
 }

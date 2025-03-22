@@ -22,8 +22,8 @@ use Illuminate\Support\Facades\Gate;
 class ApplicationController extends Controller
 {
   // Method to apply for a project
-  public function applyForProject(Project $project)
-  {m
+  public function applyJob(Swifthayajob $job)
+  {
     DB::beginTransaction(); // Start transaction to ensure data consistency
 
     try {
@@ -33,65 +33,18 @@ class ApplicationController extends Controller
 
       // Ensure user has a talent profile
       if (is_null($talent_profile)) {
-        throw new Exception('User does not have a talent profile');
+        return response()->json([
+          "status" => "error",
+          "message" => "User does not have a talent profile",
+        ], 400);
       }
 
       // Check if the user's and talent profile's status are approved
       if ($user->status !== 'approved' || $talent_profile->status !== 'approved') {
-        throw new Exception("User's profile has not been approved");
-      }
-
-      // Ensure the user hasn't already applied for the project
-      $has_applied_to_project = Application::where([
-        'applicant_id' => $user->id,
-        'project_id' => $project->id,
-      ])->exists();
-
-      if ($has_applied_to_project) {
-        throw new Exception('User has already applied for this project');
-      }
-
-      // Create the application
-      $application = $user->applications()->create([
-        'applicant_id' => $user->id,
-        'project_id' => $project->id,
-      ]);
-
-      $application->refresh(); // Reload model to get any default values
-
-      // Eager load the job details along with the application
-      $application->load('project');
-
-      DB::commit(); // Commit transaction
-
-      return response()->json([
-        'message' => 'Application successful',
-        'data' => new ApplicationResource($application),
-      ], 201);
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback transaction on error
-      return response()->json(['message' => $e->getMessage()], 400);
-    }
-  }
-
-  // Method to apply for a job
-  public function applyForJob(Swifthayajob $job)
-  {
-    DB::beginTransaction(); // Start transaction
-
-    try {
-      $user = Auth::user();
-      $user_profile = User_profile::where('user_id', $user->id)->first();
-      $talent_profile = $user_profile->talentprofile;
-
-      // Ensure user has a talent profile
-      if (is_null($talent_profile)) {
-        throw new Exception('User does not have a talent profile');
-      }
-
-      // Check if the user's and talent profile's status are approved
-      if ($user->status !== 'approved' || $talent_profile->status !== 'approved') {
-        throw new Exception("User's profile has not been approved");
+        return response()->json([
+          "status" => "error",
+          "message" => "User's profile has not been approved",
+        ], 400);
       }
 
       // Ensure the user hasn't already applied for the job
@@ -100,9 +53,14 @@ class ApplicationController extends Controller
         'swifthayajob_id' => $job->id,
       ])->exists();
 
+      // return "good";
       if ($has_applied_to_job) {
-        throw new Exception('User has already applied for this job');
+        return response()->json([
+          "status" => "error",
+          "message" => "User has already applied for this job",
+        ], 400);
       }
+
 
       // Create the application
       $application = $user->applications()->create([
@@ -111,37 +69,24 @@ class ApplicationController extends Controller
       ]);
 
       $application->refresh(); // Reload model to get any default values
-
       // Eager load the job details along with the application
+
       $application->load('swifthayajob');
 
       DB::commit(); // Commit transaction
 
       return response()->json([
+        "status" => "success",
         'message' => 'Application successful',
         'data' => new ApplicationResource($application),
       ], 201);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback transaction on error
-      return response()->json(['message' => $e->getMessage()], 400);
-    }
-  }
-
-  // Retrieve all projects that the authenticated talent has applied to
-  public function projectApplications()
-  {
-    try {
-      $applicant_id = Auth::user()->id;
-
-      // // Get all projects the user has applied to
-      // $projects = Project::whereHas('application', function ($query) use ($applicant_id) {
-      //   $query->where('applicant_id', $applicant_id);
-      // })->get();
-      $application = Application::with("project")->where("applicant_id", $applicant_id)->whereNotNull('project_id')->latest()->paginate(10);
-
-      return ApplicationResource::collection($application);
-    } catch (Exception $e) {
-      return response()->json(['message' => $e->getMessage()], 400);
+      return response()->json([
+        "status" => "error",
+        "code" => 500,
+        "message" => "Something went wrong on the server",
+      ], 500);
     }
   }
 
@@ -160,28 +105,11 @@ class ApplicationController extends Controller
 
       return ApplicationResource::collection($application);
     } catch (Exception $e) {
-      return response()->json(['message' => $e->getMessage()], 400);
-    }
-  }
-
-  // Retrieve users that applied to a specific project
-  public function viewProjectApplicants($project_id)
-  {
-    try {
-      // // Fetch all users who applied to the given project
-      // $applicants = User::whereHas('applications', function ($query) use ($project_id) {
-      //   $query->where('project_id', $project_id);
-      // })->get();
-
-      $employer_id = Auth::user()->id;
-
-      $applicants = Application::with("user")->where("project_id", $project_id)->whereHas('project', function ($query) use ($employer_id) {
-        $query->where('poster_id', $employer_id);
-      })->latest()->paginate(10);
-
-      return ApplicationResource::collection($applicants);
-    } catch (Exception $e) {
-      return response()->json(['message' => $e->getMessage()], 400);
+      return response()->json([
+        "status" => "error",
+        "code" => 500,
+        "message" => "Something went wrong on the server",
+      ], 500);
     }
   }
 
@@ -190,19 +118,20 @@ class ApplicationController extends Controller
   {
     try {
       // Fetch all users who applied to the given job
-      // $applicants = User::whereHas('applications', function ($query) use ($job_id) {
-      //   $query->where('swifthayajob_id', $job_id);
-      // })->get();
 
       $employer_id = Auth::user()->id;
 
       $applicants = Application::with("user")->where("swifthayajob_id", $job_id)->whereHas('swifthayajob', function ($query) use ($employer_id) {
-        $query->where('company_id', $employer_id);
+        $query->where('employer_id', $employer_id);
       })->latest()->paginate(10);
 
       return ApplicationResource::collection($applicants);
     } catch (Exception $e) {
-      return response()->json(['message' => $e->getMessage()], 400);
+      return response()->json([
+        "status" => "error",
+        "code" => 500,
+        "message" => "Something went wrong on the server",
+      ], 500);
     }
   }
 
@@ -213,6 +142,13 @@ class ApplicationController extends Controller
 
     try {
       Gate::authorize("modify", $application);
+      if ($application->status === 'accepted') {
+        return response()->json([
+          "status" => "error",
+          "code" => 400,
+          'message' => 'Application has already been accepted.'
+        ], 400);
+      }
       // Update the application status to 'accepted'
       $application->status = 'accepted';
       $application->save();
@@ -222,7 +158,11 @@ class ApplicationController extends Controller
       return response()->json(['message' => 'Application accepted successfully.', 'data' => new ApplicationResource($application)]);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback transaction on error
-      return response()->json(['message' => $e->getMessage()], 400);
+      return response()->json([
+        "status" => "error",
+        "code" => 500,
+        "message" => "Something went wrong on the server",
+      ], 500);
     }
   }
 
@@ -234,6 +174,13 @@ class ApplicationController extends Controller
     try {
       Gate::authorize("modify", $application);
       // Update the application status to 'shortlisted'
+      if ($application->status === 'shortlisted') {
+        return response()->json([
+          "status" => "error",
+          "code" => 400,
+          'message' => 'Application has already been shortlisted.'
+        ], 400);
+      }
       $application->status = 'shortlisted';
       $application->save();
 
@@ -242,7 +189,11 @@ class ApplicationController extends Controller
       return response()->json(['message' => 'Application shortlisted successfully.', 'data' => new ApplicationResource($application)]);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback transaction on error
-      return response()->json(['message' => $e->getMessage()], 400);
+      return response()->json([
+        "status" => "error",
+        "code" => 500,
+        "message" => "Something went wrong on the server",
+      ], 500);
     }
   }
 
@@ -253,7 +204,13 @@ class ApplicationController extends Controller
 
     try {
       Gate::authorize("modify", $application);
-
+      if ($application->status === 'rejected') {
+        return response()->json([
+          "status" => "error",
+          "code" => 400,
+          'message' => 'Application has already been rejected.'
+        ], 400);
+      }
       // Update the application status to 'rejected'
       $application->status = 'rejected';
       $application->save();
@@ -263,7 +220,11 @@ class ApplicationController extends Controller
       return response()->json(['message' => 'Application rejected successfully.', 'data' => new ApplicationResource($application)]);
     } catch (Exception $e) {
       DB::rollBack(); // Rollback transaction on error
-      return response()->json(['message' => $e->getMessage()], 400);
+      return response()->json([
+        "status" => "error",
+        "code" => 500,
+        "message" => "Something went wrong on the server",
+      ], 500);
     }
   }
 }

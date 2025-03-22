@@ -24,10 +24,16 @@ class UserController extends Controller
       // Retrieve users with their associated user profile
       $users = User::with("userprofile")->paginate(10);
       // Return the users as a resource collection
-      return UserResource::collection($users);
+      return UserResource::collection($users)
+        ->response()
+        ->setStatusCode(200);;
     } catch (Exception $e) {
       // Handle exception and return error message
-      return response()->json(['message' => 'Failed to retrieve users', 'error' => $e->getMessage()], 500);
+      return response()->json([
+        "status" => "error",
+        "code" => 500,
+        'message' => 'Failed to retrieve users',
+      ], 500);
     }
   }
   // Get number of users
@@ -37,6 +43,7 @@ class UserController extends Controller
 
       $users_count = User::count();
       return response()->json([
+        "status" => "success",
         "message" => "User count retrieved successfully.",
         "data" => [
           "count" => $users_count
@@ -44,95 +51,24 @@ class UserController extends Controller
       ]);
     } catch (Exception $e) {
       // Handle exception and return error message
-      return response()->json(['message' => 'Failed to retrieve user count', 'error' => $e->getMessage()], 500);
+      return response()->json([
+        "status" => "error",
+        "code" => 500,
+        'message' => 'Failed to retrieve user count',
+      ], 500);
     }
   }
-  // Store a new admin
-  public function store(RegisterUserRequest $request)
-  {
-    DB::beginTransaction(); // Start transaction
-    try {
-      // Validate the request data
-      $validated = $request->validated();
-      // Create the user in the database
-      // Check if email is unique (could be handled in validation rules)
-      $user = User::create([
-        'email' => $validated["email"],
-        'password' => Hash::make($validated["password"]), // Hash the password securely
-        'user_type' => "admin",
-      ]);
-      // If user creation is successful, create the user profile
-      if ($user) {
-        $user->userprofile()->create([
-          'user_id' => $user->id,
-          'first_name' => $validated["first_name"],
-          'last_name' => $validated["last_name"],
-          "bio" => $validated["bio"],
-          "location" => $validated["location"],
-          "phone_number" => $validated["phone_number"],
-          "website" => $validated["website"]
-        ]);
 
-        // Create an API token (if using Sanctum or JWT)
-        $token = $user->createToken('API Token')->plainTextToken;
-        $user->refresh();
-        DB::commit(); // Commit transaction if everything is successful
-        // Return a success response with the token and user details
-        return response()->json([
-          "message" => "Admin created successfully",
-          "user" => new UserResource($user),
-          "token" => $token
-        ], 201); // Return 201 Created for a successful resource creation
-      }
-      throw new Exception('User registration failed');
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback transaction on error
-      return response()->json(['message' => 'User registration failed', 'error' => $e->getMessage()], 500);
-    }
-  }
   // Show a specific user's details
   public function show(User $user)
   {
-    try {
-      // // Find the user by ID and load their profile
-      // $user = User::with('userprofile')->findOrFail($id); // Use findOrFail to automatically throw a 404 error if user not found
-      // // Return the user details as a resource
-      return new UserResource($user);
-    } catch (Exception $e) {
-      // Return a 404 error if the user is not found
-      return response()->json(['message' => 'User not found', 'error' => $e->getMessage()], 404);
-    }
+    return response()->json([
+      "status" => "success",
+      "message" => "User retrieved successfully.",
+      "data" => new UserResource($user)
+    ]);
   }
-  // Update user information
-  public function update(UpdateUserRequest $request, User $user)
-  {
-    DB::beginTransaction(); // Start transaction
-    try {
-      // Validate the request data
-      $validated = $request->validated();
-      // Find the user profile associated with the user
-      $profile = User_profile::where("user_id", $user->id)->first();
 
-      // Update user details
-      $user->update([
-        'email' => $validated["email"],
-        'password' => $user->password // Keep the old password if not changing (NB:allow updating password separately)
-      ]);
-      // $validated["first_name"] = $validated["first_name"];
-      // $validated["last_name"] = $validated["last_name"];
-      // Update user profile details
-      $profile->update($validated);
-      DB::commit(); // Commit transaction
-      // Return success response
-      return response()->json([
-        'message' => 'User updated successfully',
-        'user' => new UserResource($user),
-      ], 200);
-    } catch (Exception $e) {
-      DB::rollBack(); // Rollback transaction on error
-      return response()->json(['message' => 'Failed to update user', 'error' => $e->getMessage()], 500);
-    }
-  }
 
   // // Delete user
   // public function destroy(User $user)
@@ -154,19 +90,27 @@ class UserController extends Controller
     try {
       // Check if user is already banned to avoid unnecessary updates
       if ($user->user_status === 'banned') {
-        return response()->json(['message' => 'User is already banned'], 200);
+        return response()->json([
+          "status" => "error",
+          'message' => 'User is already banned'
+        ], 400);
       }
       // Set the user user_status to 'banned'
       $user->user_status = 'banned';
       $user->save();
       $user->refresh();
       return response()->json([
+        'status' => 'success',
         'message' => 'User has been banned successfully.',
         'data' => new UserResource($user)
       ], 200);
     } catch (Exception $e) {
       // Return an error message in case of failure
-      return response()->json(['message' => 'Failed to bann user', 'error' => $e->getMessage()], 500);
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'message' => 'Failed to bann user',
+      ], 500);
     }
   }
   // Unban User
@@ -175,7 +119,10 @@ class UserController extends Controller
     try {
       // Check if user is already active to avoid unnecessary updates
       if ($user->user_status === 'active') {
-        return response()->json(['message' => 'User is already active'], 200);
+        return response()->json([
+          "status" => "error",
+          'message' => 'User is not banned'
+        ], 400);
       }
       // Set the user user_status to 'active'
       $user->user_status = 'active';
@@ -183,12 +130,17 @@ class UserController extends Controller
       $user->refresh();
 
       return response()->json([
+        'status' => 'success',
         'message' => 'User has been unbanned successfully.',
         'data' => new UserResource($user)
       ], 200);
     } catch (Exception $e) {
       // Return an error message in case of failure
-      return response()->json(['message' => 'Failed to unbann user', 'error' => $e->getMessage()], 500);
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'message' => 'Failed to unbann user',
+      ], 500);
     }
   }
 
@@ -198,7 +150,10 @@ class UserController extends Controller
     try {
       // Check if user is already approved to avoid unnecessary updates
       if ($user->status === 'approved') {
-        return response()->json(['message' => 'User is already approved'], 200);
+        return response()->json([
+          "status" => "error",
+          'message' => 'User is already approved'
+        ], 400);
       }
       // Set the user status to 'approved'
       $user->status = 'approved';
@@ -206,12 +161,17 @@ class UserController extends Controller
       $user->refresh();
 
       return response()->json([
+        'status' => 'success',
         'message' => 'User has been approved successfully.',
         'data' => new UserResource($user)
       ], 200);
     } catch (Exception $e) {
       // Return an error message in case of failure
-      return response()->json(['message' => 'Failed to approve user', 'error' => $e->getMessage()], 500);
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'message' => 'Failed to approve user',
+      ], 500);
     }
   }
   // Reject User
@@ -220,19 +180,27 @@ class UserController extends Controller
     try {
       // Check if user is already rejected to avoid unnecessary updates
       if ($user->status === 'rejected') {
-        return response()->json(['message' => 'User is already rejected'], 200);
+        return response()->json([
+          'status' => 'error',
+          'message' => 'User is already rejected'
+        ], 400);
       }
       // Set the user status to 'rejected'
       $user->status = 'rejected';
       $user->save();
       $user->refresh();
       return response()->json([
-        'message' => 'User has been rejected.',
+        'status' => 'success',
+        'message' => 'User has been rejected successfully.',
         'data' => new UserResource($user)
       ], 200);
     } catch (Exception $e) {
       // Return an error message in case of failure
-      return response()->json(['message' => 'Failed to reject user', 'error' => $e->getMessage()], 500);
+      return response()->json([
+        'status' => 'error',
+        'code' => 500,
+        'message' => 'Failed to reject user',
+      ], 500);
     }
   }
 }

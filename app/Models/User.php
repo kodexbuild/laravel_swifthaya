@@ -85,7 +85,7 @@ class User extends Authenticatable
   }
   public function swifthayajob()
   {
-    return $this->hasMany(SwifthayaJob::class, 'company_id');
+    return $this->hasMany(SwifthayaJob::class, 'employer_id');
   }
   public function sentMessages()
   {
