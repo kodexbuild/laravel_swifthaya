@@ -91,8 +91,9 @@ class CompanyProfileController extends Controller
     }
   }
   // Show company profile
-  public function show(Company_profile $company_profile)
+  public function show()
   {
+    $company_profile = Auth::user()->userprofile->companyprofile;
     Gate::authorize("modify", $company_profile);
 
     return response()->json([
@@ -104,10 +105,11 @@ class CompanyProfileController extends Controller
   }
 
   // Store company profile
-  public function update(Company_profile $company_profile, StoreCompany_profileRequest $request)
+  public function update(StoreCompany_profileRequest $request)
   {
     DB::beginTransaction(); // Begin transaction
 
+    $company_profile = Auth::user()->userprofile->companyprofile;
     Gate::authorize("modify", $company_profile);
 
     try {
