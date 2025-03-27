@@ -92,8 +92,8 @@ class TalentProfileController extends Controller
   public function index(Request $request)
   {
     try {
-      // $query = Talent_profile::with("userprofile")->where('status', "approved");
-      $query = Talent_profile::with("userprofile");
+      $query = Talent_profile::with("userprofile")->where('status', "approved");
+      // $query = Talent_profile::with("userprofile");
 
       if ($request->filled('keyword')) {
         $query->where(function ($q) use ($request) {

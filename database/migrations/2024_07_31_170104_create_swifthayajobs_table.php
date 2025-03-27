@@ -28,7 +28,7 @@ return new class extends Migration
       $table->enum('job_type', ['full_time', 'part_time', 'contract', 'internship']);
       $table->timestamp('posted_at')->useCurrent();
       // $table->timestamp('deadline_date')->nullable();
-      $table->enum('job_status', ['draft', 'published'])->default('draft');
+      // $table->enum('job_status', ['draft', 'published'])->default('draft');
       $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
       $table->timestamps();
     });

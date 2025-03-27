@@ -52,7 +52,6 @@ class StoreCompany_profileRequest extends FormRequest
       'github_url' => 'nullable|string',
       'twitter_url' => 'nullable|string',
       'instagram_url' => 'nullable|string',
-      'portfolio_url' => 'nullable|string',
     ];
   }
 }

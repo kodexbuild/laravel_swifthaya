@@ -91,6 +91,7 @@ class TalentProfileController extends Controller
           'message' => 'Talent profile has already been approved.',
         ], 400);
       }
+      
       $talent_profile->status = 'approved'; // Set status to 'approved'
       $talent_profile->save(); // Save the changes
 

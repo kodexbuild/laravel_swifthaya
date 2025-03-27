@@ -27,9 +27,15 @@ class MessageController extends Controller
         ->latest()
         ->paginate(10);
 
-      return ConversationResource::collection($conversations);
+      return ConversationResource::collection($conversations)
+        ->response()
+        ->setStatusCode(200);
     } catch (Exception $e) {
-      return response()->json(['message' => 'Failed to retrieve conversations', 'error' => $e->getMessage()], 500);
+      return response()->json([
+        "status" => "error",
+        
+        'message' => 'Failed to retrieve conversations',
+      ], 500);
     }
   }
 
@@ -85,7 +91,7 @@ class MessageController extends Controller
         }
       }
       if ($user->id === $recipient->id) {
-        return response()->json(["error" => "User cannot message themselves"],400);
+        return response()->json(["error" => "User cannot message themselves"], 400);
       }
       // Validate message content
       $validated = $request->validated();

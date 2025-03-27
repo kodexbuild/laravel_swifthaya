@@ -90,32 +90,32 @@ class SwifthayajobController extends Controller
 
   // Publish job
 
-  public function publish(Swifthayajob $job)
-  {
-    // Ensure only the job owner can publish
-    Gate::authorize('update', $job);
-    DB::beginTransaction(); // Begin DB transaction
+  // public function publish(Swifthayajob $job)
+  // {
+  //   // Ensure only the job owner can publish
+  //   Gate::authorize('update', $job);
+  //   DB::beginTransaction(); // Begin DB transaction
 
-    // Prevent publishing if already published
-    if ($job->job_status === 'published') {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'This job is already published.'
-      ], 400);
-    }
-    // Update job to "published"
-    $job->update([
-      'posted_at' => Carbon::now(),
-      'job_status' => 'published'
-    ]);
-    DB::commit(); // Commit transaction
+  //   // Prevent publishing if already published
+  //   if ($job->job_status === 'published') {
+  //     return response()->json([
+  //       'status' => 'error',
+  //       'message' => 'This job is already published.'
+  //     ], 400);
+  //   }
+  //   // Update job to "published"
+  //   $job->update([
+  //     'posted_at' => Carbon::now(),
+  //     'job_status' => 'published'
+  //   ]);
+  //   DB::commit(); // Commit transaction
 
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Job has been published successfully.',
-      'data' => new SwifthayajobResource($job)
-    ]);
-  }
+  //   return response()->json([
+  //     'status' => 'success',
+  //     'message' => 'Job has been published successfully.',
+  //     'data' => new SwifthayajobResource($job)
+  //   ]);
+  // }
 
 
   // Update job
@@ -158,8 +158,8 @@ class SwifthayajobController extends Controller
   public function job_search(Request $request)
   {
     try {
-      // $query = Swifthayajob::with("user")->where(['status' => "approved", "job_status" => "published"]); // Filter only approved jobs
-      $query = Swifthayajob::with("user")->where('job_status', 'published');
+      $query = Swifthayajob::with("user")->where(['status' => "approved", "job_status" => "published"]); // Filter only approved jobs
+      // $query = Swifthayajob::with("user");
       if ($request->filled('keyword')) {
         $query->where(function ($q) use ($request) {
           $q->orWhere('title', 'like', '%' . $request->keyword . '%');
